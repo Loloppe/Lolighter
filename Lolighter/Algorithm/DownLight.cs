@@ -18,7 +18,7 @@ namespace Lolighter.Algorithm
             light.Sort((x, y) => x.beat.CompareTo(y.beat));
 
             // Sort each of them per type
-            Dictionary<int, List<BasicEventData>> mapEvents = new Dictionary<int, List<BasicEventData>>(9);
+            Dictionary<int, List<BasicEventData>> mapEvents = new(9);
             foreach (var type in EnvironmentEvent.AllEventType)
             {
                 mapEvents.Add(type, new List<BasicEventData>(light.Where(x => x.eventType == type)));
@@ -54,7 +54,7 @@ namespace Lolighter.Algorithm
 
         static List<BasicEventData> On(List<BasicEventData> light, double onSpeed)
         {
-            for (int i = light.Count() - 1; i > 0; i--)
+            for (int i = light.Count - 1; i > 0; i--)
             {
                 BasicEventData previous = light[i - 1];
                 BasicEventData now = light[i];
@@ -78,7 +78,7 @@ namespace Lolighter.Algorithm
 
         static List<BasicEventData> Spam(List<BasicEventData> light, double spamSpeed)
         {
-            for (int i = light.Count() - 1; i > 0; i--)
+            for (int i = light.Count - 1; i > 0; i--)
             {
                 BasicEventData previous = light[i - 1];
                 BasicEventData now = light[i];
@@ -95,7 +95,7 @@ namespace Lolighter.Algorithm
 
         static List<BasicEventData> Mod(List<BasicEventData> light, double speed)
         {
-            for (int i = light.Count() - 1; i > 0; i--)
+            for (int i = light.Count - 1; i > 0; i--)
             {
                 BasicEventData previous = light[i - 1];
                 BasicEventData now = light[i];
@@ -116,7 +116,7 @@ namespace Lolighter.Algorithm
             }
 
             // Now with fast stuff removed.
-            for (int i = 1; i < light.Count(); i++)
+            for (int i = 1; i < light.Count; i++)
             {
                 BasicEventData previous = light[i - 1];
                 BasicEventData now = light[i];

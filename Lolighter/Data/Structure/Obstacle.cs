@@ -4,15 +4,17 @@ namespace Lolighter.Data.Structure
 {
     internal class Obstacle
     {
-        public Obstacle(float t, int i, int l, float d, int w, int h)
+        [JsonConstructor]
+        public Obstacle(float beat, int index, int layer, float duration, int width, int height)
         {
-            beat = t;
-            index = i;
-            layer = l;
-            duration = d;
-            width = w;
-            height = h;
+            this.beat = beat;
+            this.index = index;
+            this.layer = layer;
+            this.duration = duration;
+            this.width = width;
+            this.height = height;
         }
+
         [JsonInclude]
         [JsonPropertyName("b")]
         public float beat { get; set; }

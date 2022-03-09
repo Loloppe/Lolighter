@@ -4,11 +4,11 @@ namespace Lolighter.Data.Structure
 {
     internal class BombNote
     {
-        public BombNote(float time, int lineIndex, int lineLayer)
+        public BombNote(float beat, int index, int layer)
         {
-            beat = time;
-            index = lineIndex;
-            layer = lineLayer;
+            this.beat = beat;
+            this.index = index;
+            this.layer = layer;
         }
         [JsonInclude]
         [JsonPropertyName("b")]

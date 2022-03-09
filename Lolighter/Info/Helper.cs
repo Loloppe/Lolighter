@@ -8,10 +8,10 @@ namespace Lolighter.Info
     {
         internal static class EnvironmentEvent
         {
-            public static List<int> LightEventType = new List<int>() { 0, 1, 2, 3, 4 };
-            public static List<int> TrackRingEventType = new List<int>() { 8, 9 };
-            public static List<int> LaserRotationEventType = new List<int>() { 12, 13 };
-            public static List<int> AllEventType = new List<int>() { 0, 1, 2, 3, 4, 8, 9, 12, 13 };
+            public static List<int> LightEventType = new() { 0, 1, 2, 3, 4 };
+            public static List<int> TrackRingEventType = new() { 8, 9 };
+            public static List<int> LaserRotationEventType = new() { 12, 13 };
+            public static List<int> AllEventType = new() { 0, 1, 2, 3, 4, 8, 9, 12, 13 };
         }
 
         internal static int Swap(int temp) //Fade -> On, On -> Fade

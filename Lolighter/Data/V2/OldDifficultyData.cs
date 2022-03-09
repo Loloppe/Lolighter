@@ -1,22 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Lolighter.Data.V2
 {
     public class OldDifficultyData
     {
         public string _version { get; set; } = "2.0.0";
-        public Events[] _events { get; set; } = Array.Empty<Events>();
-        public Notes[] _notes { get; set; } = Array.Empty<Notes>();
-        public Obstacles[] _obstacles { get; set; } = Array.Empty<Obstacles>();
+        public List<Events> _events { get; set; } = new();
+        public List<Notes> _notes { get; set; } = new();
+        public List<Obstacles> _obstacles { get; set; } = new();
         public CustomData _customData { get; set; } = new();
-        public Waypoints[]? _waypoints { get; set; }
+        public List<Waypoints> _waypoints { get; set; } = new();
     }
 
     public class CustomData
     {
         public float _time { get; set; }
-        public BPMChange[] _BPMChanges { get; set; } = Array.Empty<BPMChange>();
-        public Bookmarks[] _bookmarks { get; set; } = Array.Empty<Bookmarks>();
+        public List<BPMChange> _BPMChanges { get; set; } = new();
+        public List<Bookmarks> _bookmarks { get; set; } = new();
     }
 
     public class BPMChange

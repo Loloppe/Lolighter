@@ -12,10 +12,10 @@ namespace Lolighter.Data.Structure
         [JsonPropertyName("o")]
         public bool on { get; set; }
 
-        public ColorBoostEventData(float b, bool o)
+        public ColorBoostEventData(float beat, bool on)
         {
-            beat = b;
-            on = o;
+            this.beat = beat;
+            this.on = on;
         }
     }
 }

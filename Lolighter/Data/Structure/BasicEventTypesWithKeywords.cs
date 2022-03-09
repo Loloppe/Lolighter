@@ -16,20 +16,21 @@ namespace Lolighter.Data.Structure
 			[JsonPropertyName("e")]
 			public int eventType;
 
-			public BasicEventTypesForKeyword(string k, int e)
+			public BasicEventTypesForKeyword(string keyword, int eventType)
 			{
-				keyword = k;
-				eventType = e;
+				this.keyword = keyword;
+				this.eventType = eventType;
 			}
 		}
 
 		[JsonInclude]
 		[JsonPropertyName("d")]
-		public List<BasicEventTypesForKeyword> d;
+		public List<BasicEventTypesForKeyword> data;
 
+		[JsonConstructor]
 		public BasicEventTypesWithKeywords(List<BasicEventTypesForKeyword> data)
 		{
-			d = data;
+			this.data = data;
 		}
-	}
+    }
 }

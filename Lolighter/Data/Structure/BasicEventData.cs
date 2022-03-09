@@ -4,6 +4,15 @@ namespace Lolighter.Data.Structure
 {
 	internal class BasicEventData
 	{
+		[JsonConstructor]
+		public BasicEventData(float beat, int eventType, int value, float floatValue)
+		{
+			this.beat = beat;
+			this.eventType = eventType;
+			this.value = value;
+			this.floatValue = floatValue;
+		}
+
 		[JsonInclude]
 		[JsonPropertyName("b")]
 		public float beat { get; set; }
@@ -19,13 +28,5 @@ namespace Lolighter.Data.Structure
 		[JsonInclude]
 		[JsonPropertyName("f")]
 		public float floatValue { get; set; }
-
-		public BasicEventData(float b, int et, int v, int f)
-        {
-			beat = b;
-			eventType = et;
-			value = v;
-			floatValue = f;
-        }
     }
 }

@@ -4,10 +4,10 @@ namespace Lolighter.Data.Structure
 {
     internal class BPMChangeEvent
     {
-        public BPMChangeEvent(float time, float b)
+        public BPMChangeEvent(float beat, float bpm)
         {
-            beat = time;
-            bpm = b;
+            this.beat = beat;
+            this.bpm = bpm;
         }
 
         [JsonInclude]

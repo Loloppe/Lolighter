@@ -9,7 +9,7 @@ namespace Lolighter.Algorithm
     {
         internal static (List<ColorBoostEventData>, List<BasicEventData>) CreateLight(List<float> Timing, float ColorOffset, float ColorSwap, bool AllowBackStrobe, bool AllowNeonStrobe, bool AllowSideStrobe, bool AllowFade, bool AllowSpinZoom, bool NerfStrobes, bool BoostLight)
         {
-            float last = new float(); //Var to stop spin-stack and also used as time check.
+            float last = new(); //Var to stop spin-stack and also used as time check.
             float[] time = new float[4]; //Now, before, before-before, before-before-before, in this order.
             //0.0D = Default value for float, similar to NULL for int.
             int[] light = new int[3]; //Now, before, before-before.
@@ -26,11 +26,11 @@ namespace Lolighter.Algorithm
             float nextfloat = 0;
             bool firstSlider = false;
             float nextSlider = new();
-            List<int> sliderLight = new List<int>() { 0, 1, 4 };
+            List<int> sliderLight = new() { 0, 1, 4 };
             int sliderIndex = 0;
             float sliderNoteCount = 0;
             bool wasSlider = false;
-            List<int> pattern = new List<int>(Enumerable.Range(0, 5));
+            List<int> pattern = new(Enumerable.Range(0, 5));
             int patternIndex = 0;
             int patternCount = 0;
             List<BasicEventData> eventTempo = new();
@@ -329,7 +329,7 @@ namespace Lolighter.Algorithm
                 // Find the next float
                 if (time[0] >= nextfloat)
                 {
-                    for (int i = Timing.FindIndex(n => n == note); i < Timing.Count() - 1; i++)
+                    for (int i = Timing.FindIndex(n => n == note); i < Timing.Count - 1; i++)
                     {
                         if (Timing[i] == Timing[i - 1])
                         {
@@ -344,7 +344,7 @@ namespace Lolighter.Algorithm
                 {
                     sliderNoteCount = 0;
 
-                    for (int i = Timing.FindIndex(n => n == note); i < Timing.Count() - 1; i++)
+                    for (int i = Timing.FindIndex(n => n == note); i < Timing.Count - 1; i++)
                     {
                         // Between 1/8 and 0, same cut direction or dots
                         if (Timing[i] - Timing[i - 1] <= 0.125 && Timing[i] - Timing[i - 1] > 0 && (Timing[i] == Timing[i - 1] || Timing[i] == 8))
@@ -465,7 +465,7 @@ namespace Lolighter.Algorithm
                     }
 
                     // Place off event
-                    if (Timing[Timing.Count() - 1] != note)
+                    if (Timing[^1] != note)
                     {
                         if (Timing[Timing.FindIndex(n => n == note) + 1] == nextfloat)
                         {
@@ -541,7 +541,7 @@ namespace Lolighter.Algorithm
             eventTempo = eventTempo.OrderBy(o => o.beat).ToList();
 
             // Remove fused
-            for (int i = 1; i < eventTempo.Count() - 1; i++)
+            for (int i = 1; i < eventTempo.Count - 1; i++)
             {
                 // Very close to eachother
                 if (eventTempo.Any(e => e.beat == eventTempo[i].beat && e.eventType == eventTempo[i].eventType && e != eventTempo[i]))

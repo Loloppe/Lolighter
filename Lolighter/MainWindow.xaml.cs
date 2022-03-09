@@ -119,13 +119,13 @@ namespace Lolighter
         {
             
 
-            dataItem[0].Column2 = difficultyData[Index].colorNotes.Length.ToString();
-            dataItem[1].Column2 = difficultyData[Index].bombNotes.Length.ToString();
-            dataItem[2].Column2 = difficultyData[Index].obstacles.Length.ToString();
-            dataItem[3].Column2 = difficultyData[Index].burstSliders.Length.ToString();
-            dataItem[4].Column2 = difficultyData[Index].sliders.Length.ToString();
-            dataItem[5].Column2 = difficultyData[Index].basicBeatmapEvents.Length.ToString();
-            dataItem[6].Column2 = difficultyData[Index].colorBoostBeatmapEvents.Length.ToString();
+            dataItem[0].Column2 = difficultyData[Index].colorNotes.Count.ToString();
+            dataItem[1].Column2 = difficultyData[Index].bombNotes.Count.ToString();
+            dataItem[2].Column2 = difficultyData[Index].obstacles.Count.ToString();
+            dataItem[3].Column2 = difficultyData[Index].burstSliders.Count.ToString();
+            dataItem[4].Column2 = difficultyData[Index].sliders.Count.ToString();
+            dataItem[5].Column2 = difficultyData[Index].basicBeatmapEvents.Count.ToString();
+            dataItem[6].Column2 = difficultyData[Index].colorBoostBeatmapEvents.Count.ToString();
 
             DiffDataGrid.Items[0] = dataItem[0];
             DiffDataGrid.Items[1] = dataItem[1];
@@ -207,7 +207,8 @@ namespace Lolighter
                                                 }
                                                 else // Version 3.0.0 beatmap
                                                 {
-                                                    difficultyData.Add(JsonSerializer.Deserialize<DifficultyData>(json));
+                                                    var test = JsonSerializer.Deserialize<DifficultyData>(json);
+                                                    difficultyData.Add(test);
                                                 }
                                             }
 
@@ -216,9 +217,10 @@ namespace Lolighter
                                     }
                                 }
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
                                 MessageBox.Show("ERROR: Reading difficulty");
+                                MessageBox.Show(ex.Message);
                             }
 
                             if(difficultyData.Count > 0)
@@ -300,13 +302,13 @@ namespace Lolighter
                 boostLight = true;
             }
 
-            List<ColorBoostEventData> boostEvents = new();
-            List<BasicEventData> basicEvents = new();
+            List<ColorBoostEventData> boostEvents;
+            List<BasicEventData> basicEvents;
 
             (boostEvents, basicEvents) = Light.CreateLight(timing, offset, colorSwap, allowBackLight, allowNeonLight, allowSideLight, allowFade, allowSpinZoom, nerfStrobes, boostLight);
 
-            difficultyData[DiffListBox.SelectedIndex].colorBoostBeatmapEvents = boostEvents.ToArray();
-            difficultyData[DiffListBox.SelectedIndex].basicBeatmapEvents = basicEvents.ToArray();
+            difficultyData[DiffListBox.SelectedIndex].colorBoostBeatmapEvents = boostEvents;
+            difficultyData[DiffListBox.SelectedIndex].basicBeatmapEvents = basicEvents;
 
             if (applyToAll)
             {
@@ -342,12 +344,12 @@ namespace Lolighter
             {
                 foreach (var difficulty in difficultyData)
                 {
-                    difficulty.basicBeatmapEvents = DownLight.Down(difficulty.basicBeatmapEvents.ToList(), 0.5, 0.25, 5).ToArray();
+                    difficulty.basicBeatmapEvents = DownLight.Down(difficulty.basicBeatmapEvents.ToList(), 0.5, 0.25, 5);
                 }
             }
             else
             {
-                difficultyData[DiffListBox.SelectedIndex].basicBeatmapEvents = DownLight.Down(difficultyData[DiffListBox.SelectedIndex].basicBeatmapEvents.ToList(), 0.5, 0.25, 5).ToArray();
+                difficultyData[DiffListBox.SelectedIndex].basicBeatmapEvents = DownLight.Down(difficultyData[DiffListBox.SelectedIndex].basicBeatmapEvents.ToList(), 0.5, 0.25, 5);
             }
 
             FillDataGrid(DiffListBox.SelectedIndex);
@@ -376,20 +378,18 @@ namespace Lolighter
                     string fileName = DiffListBox.Items[i].ToString();
                     #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
-                    using (StreamWriter wr = new StreamWriter(complete + "\\" + fileName))
-                    {
-                        wr.WriteLine(JsonSerializer.Serialize<DifficultyData>(difficultyData[i]));
-                    }
+                    using StreamWriter wr = new(complete + "\\" + fileName);
+                    wr.WriteLine(JsonSerializer.Serialize<DifficultyData>(difficultyData[i]));
                 }
 
-                using (StreamWriter wr = new StreamWriter(complete + "\\" + "Info.dat"))
+                using (StreamWriter wr = new(complete + "\\" + "Info.dat"))
                 {
                     wr.WriteLine(JsonSerializer.Serialize<InfoData>(infoData));
                 }
 
                 MessageBox.Show("Done");
 
-                ProcessStartInfo dir = new ProcessStartInfo
+                ProcessStartInfo dir = new()
                 {
                     Arguments = complete,
                     FileName = "explorer.exe"
