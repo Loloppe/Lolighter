@@ -178,10 +178,12 @@ namespace Lolighter.Algorithm
                     if(boost)
                     {
                         boostEvent.Add(new ColorBoostEventData(offset, false));
+                        boost = false;
                     }
                     else
                     {
                         boostEvent.Add(new ColorBoostEventData(offset, true));
+                        boost = true;
                     }
                 }
 
@@ -331,10 +333,13 @@ namespace Lolighter.Algorithm
                 {
                     for (int i = Timing.FindIndex(n => n == note); i < Timing.Count - 1; i++)
                     {
-                        if (Timing[i] == Timing[i - 1])
+                        if(i != 0)
                         {
-                            nextfloat = Timing[i];
-                            break;
+                            if (Timing[i] == Timing[i - 1])
+                            {
+                                nextfloat = Timing[i];
+                                break;
+                            }
                         }
                     }
                 }
@@ -346,20 +351,23 @@ namespace Lolighter.Algorithm
 
                     for (int i = Timing.FindIndex(n => n == note); i < Timing.Count - 1; i++)
                     {
-                        // Between 1/8 and 0, same cut direction or dots
-                        if (Timing[i] - Timing[i - 1] <= 0.125 && Timing[i] - Timing[i - 1] > 0 && (Timing[i] == Timing[i - 1] || Timing[i] == 8))
+                        if(i != 0)
                         {
-                            // Search for the last note of the slider
-                            if (sliderNoteCount == 0)
+                            // Between 1/8 and 0, same cut direction or dots
+                            if (Timing[i] - Timing[i - 1] <= 0.125 && Timing[i] - Timing[i - 1] > 0 && (Timing[i] == Timing[i - 1] || Timing[i] == 8))
                             {
-                                // This is the first note of the slider
-                                nextSlider = Timing[i - 1];
+                                // Search for the last note of the slider
+                                if (sliderNoteCount == 0)
+                                {
+                                    // This is the first note of the slider
+                                    nextSlider = Timing[i - 1];
+                                }
+                                sliderNoteCount++;
                             }
-                            sliderNoteCount++;
-                        }
-                        else if (sliderNoteCount != 0)
-                        {
-                            break;
+                            else if (sliderNoteCount != 0)
+                            {
+                                break;
+                            }
                         }
                     }
                 }

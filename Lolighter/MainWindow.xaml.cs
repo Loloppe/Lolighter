@@ -29,6 +29,7 @@ namespace Lolighter
         internal List<DifficultyData> difficultyData = new();
         // Information on the difficulty
         internal List<DataItem> dataItem = new();
+        internal List<List<string>> oldData = new();
 
         public MainWindow()
         {
@@ -43,28 +44,29 @@ namespace Lolighter
             OpenButton.Visibility = Visibility.Visible;
 
             // Prefill DataGrid
-            for (int i = 1; i <= 2; ++i)
+            for (int i = 1; i <= 3; ++i)
             {
                 var column = new DataGridTextColumn();
-                if(i == 1)
+                switch (i)
                 {
-                    column.Header = "Type";
-                }
-                else
-                {
-                    column.Header = "#";
+                    case 1: column.Header = "Type";
+                        break;
+                    case 2: column.Header = "Before";
+                        break;
+                    case 3: column.Header = "Now";
+                        break;
                 }
                 column.Binding = new Binding("Column" + i);
                 DiffDataGrid.Columns.Add(column);
             }
 
-            dataItem.Add(new DataItem { Column1 = "Note", Column2 = "" });
-            dataItem.Add(new DataItem { Column1 = "Bomb", Column2 = "" });
-            dataItem.Add(new DataItem { Column1 = "Obstacle", Column2 = "" });
-            dataItem.Add(new DataItem { Column1 = "Chain", Column2 = "" });
-            dataItem.Add(new DataItem { Column1 = "Arc", Column2 = "" });
-            dataItem.Add(new DataItem { Column1 = "Light", Column2 = "" });
-            dataItem.Add(new DataItem { Column1 = "Boost", Column2 = "" });
+            dataItem.Add(new DataItem { Column1 = "Note", Column2 = "", Column3 = "" });
+            dataItem.Add(new DataItem { Column1 = "Bomb", Column2 = "", Column3 = "" });
+            dataItem.Add(new DataItem { Column1 = "Obstacle", Column2 = "", Column3 = "" });
+            dataItem.Add(new DataItem { Column1 = "Chain", Column2 = "", Column3 = "" });
+            dataItem.Add(new DataItem { Column1 = "Arc", Column2 = "", Column3 = "" });
+            dataItem.Add(new DataItem { Column1 = "Light", Column2 = "", Column3 = "" });
+            dataItem.Add(new DataItem { Column1 = "Boost", Column2 = "", Column3 = "" });
 
             foreach(var item in dataItem)
             {
@@ -79,6 +81,7 @@ namespace Lolighter
         {
             public string? Column1 { get; set; }
             public string? Column2 { get; set; }
+            public string? Column3 { get; set; }
         }
 
         /// <summary>
@@ -97,16 +100,16 @@ namespace Lolighter
             DownLightButton.Visibility = Visibility.Visible;
             SaveButton.Visibility = Visibility.Visible;
             //AutomapperButton.Visibility = Visibility.Visible;
-            //BombButton.Visibility = Visibility.Visible;
+            BombButton.Visibility = Visibility.Visible;
             //ExpandButton.Visibility = Visibility.Visible;
             //LineButton.Visibility = Visibility.Visible;
-            //InvertButton.Visibility = Visibility.Visible;
-            //LoloppeButton.Visibility = Visibility.Visible;
-            //WindowButton.Visibility = Visibility.Visible;
+            InvertButton.Visibility = Visibility.Visible;
+            LoloppeButton.Visibility = Visibility.Visible;
+            ChainButton.Visibility = Visibility.Visible;
             //ShrinkButton.Visibility = Visibility.Visible;
             //ShuffleButton.Visibility = Visibility.Visible;
-            //SliderButton.Visibility = Visibility.Visible;
-            //DownmapButton.Visibility = Visibility.Visible;
+            SliderButton.Visibility = Visibility.Visible;
+            DDButton.Visibility = Visibility.Visible;
             // Show data
             DiffDataGrid.Visibility = Visibility.Visible;
         }
@@ -117,15 +120,23 @@ namespace Lolighter
         /// <param name="Index">Difficulty</param>
         public void FillDataGrid(int Index)
         {
-            
+            List<string> temp = oldData[Index];
 
-            dataItem[0].Column2 = difficultyData[Index].colorNotes.Count.ToString();
-            dataItem[1].Column2 = difficultyData[Index].bombNotes.Count.ToString();
-            dataItem[2].Column2 = difficultyData[Index].obstacles.Count.ToString();
-            dataItem[3].Column2 = difficultyData[Index].burstSliders.Count.ToString();
-            dataItem[4].Column2 = difficultyData[Index].sliders.Count.ToString();
-            dataItem[5].Column2 = difficultyData[Index].basicBeatmapEvents.Count.ToString();
-            dataItem[6].Column2 = difficultyData[Index].colorBoostBeatmapEvents.Count.ToString();
+            dataItem[0].Column2 = temp[0];
+            dataItem[1].Column2 = temp[1];
+            dataItem[2].Column2 = temp[2];
+            dataItem[3].Column2 = temp[3];
+            dataItem[4].Column2 = temp[4];
+            dataItem[5].Column2 = temp[5];
+            dataItem[6].Column2 = temp[6];
+
+            dataItem[0].Column3 = difficultyData[Index].colorNotes.Count.ToString();
+            dataItem[1].Column3 = difficultyData[Index].bombNotes.Count.ToString();
+            dataItem[2].Column3 = difficultyData[Index].obstacles.Count.ToString();
+            dataItem[3].Column3 = difficultyData[Index].burstSliders.Count.ToString();
+            dataItem[4].Column3 = difficultyData[Index].sliders.Count.ToString();
+            dataItem[5].Column3 = difficultyData[Index].basicBeatmapEvents.Count.ToString();
+            dataItem[6].Column3 = difficultyData[Index].colorBoostBeatmapEvents.Count.ToString();
 
             DiffDataGrid.Items[0] = dataItem[0];
             DiffDataGrid.Items[1] = dataItem[1];
@@ -213,6 +224,18 @@ namespace Lolighter
                                             }
 
                                             DiffListBox.Items.Add(beatmap._beatmapFilename);
+
+                                            List<string> temp = new();
+
+                                            temp.Add(difficultyData.Last().colorNotes.Count.ToString());
+                                            temp.Add(difficultyData.Last().bombNotes.Count.ToString());
+                                            temp.Add(difficultyData.Last().obstacles.Count.ToString());
+                                            temp.Add(difficultyData.Last().burstSliders.Count.ToString());
+                                            temp.Add(difficultyData.Last().sliders.Count.ToString());
+                                            temp.Add(difficultyData.Last().basicBeatmapEvents.Count.ToString());
+                                            temp.Add(difficultyData.Last().colorBoostBeatmapEvents.Count.ToString());
+
+                                            oldData.Add(temp);
                                         }
                                     }
                                 }
@@ -334,7 +357,7 @@ namespace Lolighter
         {
             bool applyToAll = false;
 
-            MessageBoxResult messageBoxResult = MessageBox.Show("Do you want to apply Downlight to all the difficulty?", "Light", MessageBoxButton.YesNo);
+            MessageBoxResult messageBoxResult = MessageBox.Show("Do you want to apply Downlight to all the difficulty?", "Downlight", MessageBoxButton.YesNo);
             if (messageBoxResult == MessageBoxResult.Yes)
             {
                 applyToAll = true;
@@ -422,27 +445,42 @@ namespace Lolighter
 
         private void SliderButton_Click(object sender, RoutedEventArgs e)
         {
+            bool limiter = true;
 
-        }
+            MessageBoxResult messageBoxResult = MessageBox.Show("Use the limiter? Default: Yes", "Slider", MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.No)
+            {
+                limiter = false;
+            }
 
-        private void WindowButton_Click(object sender, RoutedEventArgs e)
-        {
-
+            difficultyData[DiffListBox.SelectedIndex].colorNotes = Sliders.MakeSliders(difficultyData[DiffListBox.SelectedIndex].colorNotes, 0.25, limiter);
+            FillDataGrid(DiffListBox.SelectedIndex);
         }
 
         private void InvertButton_Click(object sender, RoutedEventArgs e)
         {
+            bool limiter = true;
 
+            MessageBoxResult messageBoxResult = MessageBox.Show("Use the limiter? Default: Yes", "Invert", MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.No)
+            {
+                limiter = false;
+            }
+
+            difficultyData[DiffListBox.SelectedIndex].colorNotes = Invert.MakeInvert(difficultyData[DiffListBox.SelectedIndex].colorNotes, 0.25, limiter);
+            FillDataGrid(DiffListBox.SelectedIndex);
         }
 
         private void BombButton_Click(object sender, RoutedEventArgs e)
         {
-
+            difficultyData[DiffListBox.SelectedIndex].bombNotes.AddRange(Bomb.CreateBomb(difficultyData[DiffListBox.SelectedIndex].colorNotes));
+            FillDataGrid(DiffListBox.SelectedIndex);
         }
 
         private void LoloppeButton_Click(object sender, RoutedEventArgs e)
         {
-
+            difficultyData[DiffListBox.SelectedIndex].colorNotes = Loloppe.LoloppeGen(difficultyData[DiffListBox.SelectedIndex].colorNotes);
+            FillDataGrid(DiffListBox.SelectedIndex);
         }
 
         private void AutomapperButton_Click(object sender, RoutedEventArgs e)
@@ -450,14 +488,48 @@ namespace Lolighter
 
         }
 
-        private void DownmapButton_Click(object sender, RoutedEventArgs e)
+        private void LineButton_Click(object sender, RoutedEventArgs e)
         {
 
         }
 
-        private void LineButton_Click(object sender, RoutedEventArgs e)
+        private void DDButton_Click(object sender, RoutedEventArgs e)
         {
+            bool limiter = true;
+            bool removeSide = false;
 
+            MessageBoxResult messageBoxResult = MessageBox.Show("Reduce the map by half? Default: Yes", "Limiter", MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.No)
+            {
+                limiter = false;
+            }
+
+            if(limiter)
+            {
+                messageBoxResult = MessageBox.Show("Consider side note as up (to remove)? Default: No", "Limiter", MessageBoxButton.YesNo);
+                if (messageBoxResult == MessageBoxResult.Yes)
+                {
+                    removeSide = true;
+                }
+            }
+
+            List<ColorNote> colorNotes;
+            List<BurstSliderData> burstSliders;
+
+            (colorNotes, burstSliders) = DoubleDirectional.Emilia(difficultyData[DiffListBox.SelectedIndex].colorNotes, limiter, removeSide);
+            difficultyData[DiffListBox.SelectedIndex].colorNotes = colorNotes;
+            difficultyData[DiffListBox.SelectedIndex].burstSliders = burstSliders;
+            FillDataGrid(DiffListBox.SelectedIndex);
+        }
+
+        private void ChainButton_Click(object sender, RoutedEventArgs e)
+        {
+            List<ColorNote> colorNotes;
+            List<BurstSliderData> burstSliders;
+            (burstSliders, colorNotes) = Chain.Chains(difficultyData[DiffListBox.SelectedIndex].colorNotes);
+            difficultyData[DiffListBox.SelectedIndex].colorNotes = colorNotes;
+            difficultyData[DiffListBox.SelectedIndex].burstSliders = burstSliders;
+            FillDataGrid(DiffListBox.SelectedIndex);
         }
     }
 }

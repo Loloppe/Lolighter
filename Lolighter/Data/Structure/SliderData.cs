@@ -4,7 +4,18 @@ namespace Lolighter.Data.Structure
 {
 	internal class SliderData : BaseSliderData
 	{
-		[JsonInclude]
+		[JsonConstructor]
+        public SliderData(float beat, int color, int line, int layer, int direction, float tailBeat, int tailLine, int tailLayer,
+			float headControlPointLengthMultiplier, float tailControlPointLengthMultiplier, int tailCutDirection, int midAnchorMode) : 
+			base(beat, color, line, layer, direction, tailBeat, tailLine, tailLayer)
+        {
+			this.headControlPointLengthMultiplier = headControlPointLengthMultiplier;
+			this.tailControlPointLengthMultiplier = tailControlPointLengthMultiplier;
+			this.tailCutDirection = tailCutDirection;
+			this.midAnchorMode = midAnchorMode;
+        }
+
+        [JsonInclude]
 		[JsonPropertyName("mu")]
 		public float headControlPointLengthMultiplier { get; set; }
 

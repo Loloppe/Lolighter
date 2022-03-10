@@ -4,6 +4,19 @@ namespace Lolighter.Data.Structure
 {
     internal class BaseSliderData
     {
+		[JsonConstructor]
+		public BaseSliderData(float beat, int color, int line, int layer, int direction, float tailBeat, int tailLine, int tailLayer)
+        {
+			this.beat = beat;
+			this.color = color;
+			this.line = line;
+			this.layer = layer;
+			this.direction = direction;
+			this.tailBeat = tailBeat;
+			this.tailLine = tailLine;
+			this.tailLayer = tailLayer;
+        }
+
 		[JsonInclude]
 		[JsonPropertyName("b")]
 		public float beat { get; set; }
