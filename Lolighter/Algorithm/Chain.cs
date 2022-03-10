@@ -360,16 +360,112 @@ namespace Lolighter.Algorithm
             // Turn all sliders/stack/window/tower into chain
             for (int i = 0; i < others.Count; i++)
             {
-                if (others[i].First().color == ColorType.BLUE)
+                List<bool> count = new();
+                int head = 0;
+                int tail = 0;
+                int direction = 8;
+
+                // Find general cut direction
+                foreach (ColorNote note in others[i])
                 {
-                    blue.Add(others[i].First());
-                }
-                else if (others[i].First().color == ColorType.RED)
-                {
-                    red.Add(others[i].First());
+                    if(direction == 8 && note.direction == CutDirection.ANY)
+                    {
+                        if (note.color == ColorType.BLUE)
+                        {
+                            int index = blue.FindIndex(x => x == note);
+                            if(index > 0)
+                            {
+                                if (blue[index - 1].direction != CutDirection.ANY)
+                                {
+                                    direction = blue[index - 1].direction;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (note.color == ColorType.RED)
+                            {
+                                int index = blue.FindIndex(x => x == note);
+                                if(index > 0)
+                                {
+                                    if (red[index - 1].direction != CutDirection.ANY)
+                                    {
+                                        direction = red[index - 1].direction;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if(note.direction != CutDirection.ANY)
+                    {
+                        direction = note.direction;   
+                    }
                 }
 
-                BurstSliderData newSlider = new(others[i].First(), others[i].Last().beat, others[i].Last().line, others[i].Last().layer, size, 0.8f);
+                // Logic only handle up to 3 notes
+                for (int j = 0; j < others[i].Count - 1; j++)
+                {
+                    count.Add(PossibleHead(others[i][j], others[i][j + 1], direction));
+                    if(j == others[i].Count - 1)
+                    {
+                        count.Add(PossibleHead(others[i][j + 1], others[i][j + 2], direction));
+                    }
+                }
+
+                if(count.Count >= 3)
+                {
+                    if (count[0] == true && count[1] == true && count[2] == false)
+                    {
+                        head = 0;
+                        tail = 2;
+                    }
+                    else if (count[0] == true && count[1] == false && count[2] == false)
+                    {
+                        head = 0;
+                        tail = 1;
+                    }
+                    else if (count[0] == true && count[1] == false && count[2] == true)
+                    {
+                        head = 2;
+                        tail = 1;
+                    }
+                    else if (count[0] == false && count[1] == true && count[2] == true)
+                    {
+                        head = 1;
+                        tail = 0;
+                    }
+                    else if (count[0] == false && count[1] == true && count[2] == false)
+                    {
+                        head = 1;
+                        tail = 2;
+                    }
+                    else if (count[0] == false && count[1] == false && count[2] == true)
+                    {
+                        head = 2;
+                        tail = 0;
+                    }
+                }
+                else if(count[0])
+                {
+                    head = 0;
+                    tail = 1;
+                }
+                else
+                {
+                    head = 1;
+                    tail = 0;
+                }
+
+                if (others[i][head].color == ColorType.BLUE)
+                {
+                    blue.Add(others[i][head]);
+                }
+                else if (others[i][head].color == ColorType.RED)
+                {
+                    red.Add(others[i][head]);
+                }
+
+                BurstSliderData newSlider = new(others[i][head], others[i][tail].beat, others[i][tail].line, others[i][tail].layer, size, 0.8f);
                 burstSliders.Add(newSlider);
             }
 

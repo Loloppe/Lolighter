@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Lolighter.Data.Structure;
+using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 
@@ -50,6 +51,59 @@ namespace Lolighter.Info
                 list[k] = list[n];
                 list[n] = value;
             }
+        }
+
+        internal static bool PossibleHead(ColorNote note, ColorNote next, int direction)
+        {
+            if (note.direction == CutDirection.ANY && next.direction == CutDirection.ANY && direction != 8)
+            {
+                if (next.line > note.line && (direction == 3 || direction == 5 || direction == 7))
+                {
+                    return true;
+                }
+                if (next.line < note.line && (direction == 2 || direction == 4 || direction == 6))
+                {
+                    return true;
+                }
+                if (next.layer > note.layer && (direction == 0 || direction == 4 || direction == 5))
+                {
+                    return true;
+                }
+                if (next.layer < note.layer && (direction == 1 || direction == 6 || direction == 7))
+                {
+                    return true;
+                }
+            }
+            else if (note.direction == CutDirection.DOWN || note.direction == CutDirection.DOWN_LEFT || note.direction == CutDirection.DOWN_RIGHT)
+            {
+                if (next.direction == CutDirection.ANY || next.layer < note.layer)
+                {
+                    return true;
+                }
+            }
+            if (note.direction == CutDirection.UP || note.direction == CutDirection.UP_LEFT || note.direction == CutDirection.UP_RIGHT)
+            {
+                if (next.direction == CutDirection.ANY || next.layer > note.layer)
+                {
+                    return true;
+                }
+            }
+            if (note.direction == CutDirection.LEFT || note.direction == CutDirection.UP_LEFT || note.direction == CutDirection.DOWN_LEFT)
+            {
+                if (next.direction == CutDirection.ANY || next.line < note.line)
+                {
+                    return true;
+                }
+            }
+            if (note.direction == CutDirection.RIGHT || note.direction == CutDirection.UP_RIGHT || note.direction == CutDirection.DOWN_RIGHT)
+            {
+                if (next.direction == CutDirection.ANY || next.line > note.line)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         internal static class Line
