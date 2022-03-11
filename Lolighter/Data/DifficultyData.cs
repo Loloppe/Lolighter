@@ -255,7 +255,6 @@ namespace Lolighter.Data
             return basicEvents;
         }
 
-        //Not sure about that one
         public static List<Obstacle> ConvertOldObstaclesToNew(List<Obstacles> obstacles)
         {
             List<Obstacle> obstacle = new();
@@ -263,11 +262,11 @@ namespace Lolighter.Data
             {
                 if (obstacles[i]._type == 0) // Full
                 {
-                    obstacle.Add(new(obstacles[i]._time, obstacles[i]._lineIndex, 0, obstacles[i]._duration, obstacles[i]._width, 3));
+                    obstacle.Add(new(obstacles[i]._time, obstacles[i]._lineIndex, 0, obstacles[i]._duration, obstacles[i]._width, 5));
                 }
                 else if (obstacles[i]._type == 1) // Crouch
                 {
-                    obstacle.Add(new(obstacles[i]._time, obstacles[i]._lineIndex, 2, obstacles[i]._duration, obstacles[i]._width, 1));
+                    obstacle.Add(new(obstacles[i]._time, obstacles[i]._lineIndex, 2, obstacles[i]._duration, obstacles[i]._width, 3));
                 }
             }
             return obstacle;

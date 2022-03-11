@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using Lolighter.Data.V2;
+using System.Text.Json.Serialization;
 
 namespace Lolighter.Data.Structure
 {
@@ -43,6 +44,26 @@ namespace Lolighter.Data.Structure
             this.layer = bomb.layer;
             this.direction = 0;
             this.angle = 0;
+        }
+
+        public ColorNote(Notes note)
+        {
+            this.beat = note._time;
+            this.color = note._type;
+            this.line = note._lineIndex;
+            this.layer = note._lineLayer;
+            this.direction = note._cutDirection;
+            this.angle = 0;
+        }
+
+        public ColorNote(BurstSliderData chain)
+        {
+            beat = chain.beat;
+            color = chain.color;
+            line = chain.line;
+            layer = chain.layer;
+            direction = chain.direction;
+            angle = 0;
         }
 
         [JsonInclude]

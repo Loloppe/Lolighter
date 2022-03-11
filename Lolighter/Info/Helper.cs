@@ -106,6 +106,71 @@ namespace Lolighter.Info
             return false;
         }
 
+        internal static class DistributionParamType
+        {
+            public const int WAVE = 1;
+            public const int STEP = 2;
+        }
+
+        internal static class RotationDirection
+        {
+            public const int Automatic = 0;
+            public const int Clockwise = 1;
+            public const int Counterclockwise = 2;
+        }
+
+        internal static class Axis
+        {
+            public const int X = 0;
+            public const int Y = 1;
+        }
+
+        internal static class EaseType
+        {
+            public const int None = -1;
+            public const int Linear = 0;
+            public const int InQuad = 1;
+            public const int OutQuad = 2;
+            public const int InOutQuad = 3;
+        }
+
+        internal static class TransitionType
+        {
+            public const int Instant = 0;
+            public const int Interpolate = 1;
+            public const int Extend = 2;
+        }
+
+        internal static class IndexFilterType
+        {
+            public const int Division = 1;
+            public const int StepAndOffset = 2;
+        }
+
+        internal static class LaserType
+        {
+            // Further away from the center
+            public const int LEFT_BOTTOM_VERTICAL = 0;
+            public const int RIGHT_BOTTOM_VERTICAL = 1;
+            public const int LEFT_TOP_VERTICAL = 2;
+            public const int RIGHT_TOP_VERTICAL = 3;
+            // Same as those above, but close to the center
+            public const int LEFT_BOTTOM_CENTER_VERTICAL = 4;
+            public const int RIGHT_BOTTOM_CENTER_VERTICAL = 5;
+            public const int LEFT_TOP_CENTER_VERTICAL = 6;
+            public const int RIGHT_TOP_CENTER_VERTICAL = 7;
+            // Two horizontal layer on the left and two on the right
+            public const int LEFT_BOTTOM_HORIZONTAL = 8;
+            public const int RIGHT_BOTTOM_HORIZONTAL = 9;
+            public const int LEFT_TOP_HORIZONTAL = 10;
+            public const int RIGHT_TOP_HORIZONTAL = 11;
+            // At the very back, point directly toward player
+            public const int TOP_CENTER = 12;
+            public const int BOTTOM_CENTER = 13;
+            public const int LEFT_CENTER = 14;
+            public const int RIGHT_CENTER = 15;
+        }
+
         internal static class Line
         {
             public const int LEFT = 0;

@@ -15,6 +15,15 @@ namespace Lolighter.Data.Structure
 			this.midAnchorMode = midAnchorMode;
         }
 
+		public SliderData(ColorNote head, ColorNote tail, float headControlPointLengthMultiplier, float tailControlPointLengthMultiplier, int midAnchorMode) :
+			base(head.beat, head.color, head.line, head.layer, head.direction, tail.beat, tail.line, tail.layer)
+		{
+			this.headControlPointLengthMultiplier = headControlPointLengthMultiplier;
+			this.tailControlPointLengthMultiplier = tailControlPointLengthMultiplier;
+			this.tailCutDirection = tail.direction;
+			this.midAnchorMode = midAnchorMode;
+		}
+
         [JsonInclude]
 		[JsonPropertyName("mu")]
 		public float headControlPointLengthMultiplier { get; set; }

@@ -99,16 +99,12 @@ namespace Lolighter
             LightButton.Visibility = Visibility.Visible;
             DownLightButton.Visibility = Visibility.Visible;
             SaveButton.Visibility = Visibility.Visible;
-            //AutomapperButton.Visibility = Visibility.Visible;
+            AutomapperButton.Visibility = Visibility.Visible;
             BombButton.Visibility = Visibility.Visible;
-            //ExpandButton.Visibility = Visibility.Visible;
-            //LineButton.Visibility = Visibility.Visible;
+            ArceButton.Visibility = Visibility.Visible;
             InvertButton.Visibility = Visibility.Visible;
             LoloppeButton.Visibility = Visibility.Visible;
             ChainButton.Visibility = Visibility.Visible;
-            //ShrinkButton.Visibility = Visibility.Visible;
-            //ShuffleButton.Visibility = Visibility.Visible;
-            SliderButton.Visibility = Visibility.Visible;
             DDButton.Visibility = Visibility.Visible;
             // Show data
             DiffDataGrid.Visibility = Visibility.Visible;
@@ -428,35 +424,6 @@ namespace Lolighter
             }
         }
 
-        private void ShrinkButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void ExpandButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void ShuffleButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void SliderButton_Click(object sender, RoutedEventArgs e)
-        {
-            bool limiter = true;
-
-            MessageBoxResult messageBoxResult = MessageBox.Show("Use the limiter? Default: Yes", "Slider", MessageBoxButton.YesNo);
-            if (messageBoxResult == MessageBoxResult.No)
-            {
-                limiter = false;
-            }
-
-            difficultyData[DiffListBox.SelectedIndex].colorNotes = Sliders.MakeSliders(difficultyData[DiffListBox.SelectedIndex].colorNotes, 0.25, limiter);
-            FillDataGrid(DiffListBox.SelectedIndex);
-        }
-
         private void InvertButton_Click(object sender, RoutedEventArgs e)
         {
             bool limiter = true;
@@ -485,12 +452,10 @@ namespace Lolighter
 
         private void AutomapperButton_Click(object sender, RoutedEventArgs e)
         {
-
-        }
-
-        private void LineButton_Click(object sender, RoutedEventArgs e)
-        {
-
+            (difficultyData[DiffListBox.SelectedIndex].colorNotes, difficultyData[DiffListBox.SelectedIndex].burstSliders) = PatternCreator.Create(difficultyData[DiffListBox.SelectedIndex].colorNotes, "RandomStream", false, false, true);
+            difficultyData[DiffListBox.SelectedIndex].obstacles = new();
+            difficultyData[DiffListBox.SelectedIndex].bombNotes = new();
+            FillDataGrid(DiffListBox.SelectedIndex);
         }
 
         private void DDButton_Click(object sender, RoutedEventArgs e)
@@ -529,6 +494,14 @@ namespace Lolighter
             (burstSliders, colorNotes) = Chain.Chains(difficultyData[DiffListBox.SelectedIndex].colorNotes);
             difficultyData[DiffListBox.SelectedIndex].colorNotes = colorNotes;
             difficultyData[DiffListBox.SelectedIndex].burstSliders = burstSliders;
+            FillDataGrid(DiffListBox.SelectedIndex);
+        }
+
+        private void ArceButton_Click(object sender, RoutedEventArgs e)
+        {
+            List<SliderData> arc;
+            arc = Arc.CreateArc(difficultyData[DiffListBox.SelectedIndex].colorNotes);
+            difficultyData[DiffListBox.SelectedIndex].sliders = arc;
             FillDataGrid(DiffListBox.SelectedIndex);
         }
     }
