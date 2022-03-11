@@ -101,7 +101,7 @@ namespace Lolighter
             SaveButton.Visibility = Visibility.Visible;
             AutomapperButton.Visibility = Visibility.Visible;
             BombButton.Visibility = Visibility.Visible;
-            ArceButton.Visibility = Visibility.Visible;
+            ArcButton.Visibility = Visibility.Visible;
             InvertButton.Visibility = Visibility.Visible;
             LoloppeButton.Visibility = Visibility.Visible;
             ChainButton.Visibility = Visibility.Visible;
@@ -323,8 +323,9 @@ namespace Lolighter
 
             List<ColorBoostEventData> boostEvents;
             List<BasicEventData> basicEvents;
+            List<BurstSliderData> burstSliderData = new(difficultyData[DiffListBox.SelectedIndex].burstSliders);
 
-            (boostEvents, basicEvents) = Light.CreateLight(timing, offset, colorSwap, allowBackLight, allowNeonLight, allowSideLight, allowFade, allowSpinZoom, nerfStrobes, boostLight);
+            (boostEvents, basicEvents) = Light.CreateLight(timing, burstSliderData, offset, colorSwap, allowBackLight, allowNeonLight, allowSideLight, allowFade, allowSpinZoom, nerfStrobes, boostLight);
 
             difficultyData[DiffListBox.SelectedIndex].colorBoostBeatmapEvents = boostEvents;
             difficultyData[DiffListBox.SelectedIndex].basicBeatmapEvents = basicEvents;
@@ -497,7 +498,7 @@ namespace Lolighter
             FillDataGrid(DiffListBox.SelectedIndex);
         }
 
-        private void ArceButton_Click(object sender, RoutedEventArgs e)
+        private void ArcButton_Click(object sender, RoutedEventArgs e)
         {
             List<SliderData> arc;
             arc = Arc.CreateArc(difficultyData[DiffListBox.SelectedIndex].colorNotes);

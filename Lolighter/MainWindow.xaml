@@ -23,7 +23,7 @@
         <Button x:Name="BombButton" ToolTip="Add random bombs around notes" Content="Bomb" HorizontalAlignment="Left" VerticalAlignment="Center" Width="150" Click="BombButton_Click" FontSize="20" FontFamily="Arial" Visibility="Collapsed" Height="38"/>
         <Button x:Name="LoloppeButton" ToolTip="Add Loloppe notes to notes" Content="Loloppe" HorizontalAlignment="Left" VerticalAlignment="Top" Width="150" Click="LoloppeButton_Click" FontSize="20" FontFamily="Arial" Visibility="Collapsed" Margin="150,113,0,0" Height="38"/>
         <Button x:Name="AutomapperButton" ToolTip="Convert a map into a brand new map" Content="Automapper" HorizontalAlignment="Left" VerticalAlignment="Top" Width="150" Click="AutomapperButton_Click" FontSize="20" FontFamily="Arial" Visibility="Collapsed" Margin="0,151,0,0" Height="38"/>
-        <Button x:Name="ArceButton" ToolTip="Add arc between notes" Content="Arc" HorizontalAlignment="Left" VerticalAlignment="Top" Width="150" Click="ArceButton_Click" FontSize="20" FontFamily="Arial" Visibility="Collapsed" Margin="0,38,0,0" Height="38"/>
+        <Button x:Name="ArcButton" ToolTip="Add arc between notes" Content="Arc" HorizontalAlignment="Left" VerticalAlignment="Top" Width="150" Click="ArcButton_Click" FontSize="20" FontFamily="Arial" Visibility="Collapsed" Margin="0,38,0,0" Height="38"/>
         <!--Save-->
         <Button x:Name="SaveButton" Content="Save" HorizontalAlignment="Left" VerticalAlignment="Top" Width="150" Click="Save_Click" FontSize="20" FontFamily="Arial" Visibility="Collapsed" Margin="150,151,0,0" Height="38"/>
     </Grid>

@@ -7,7 +7,7 @@ namespace Lolighter.Algorithm
 {
     internal static class Light
     {
-        internal static (List<ColorBoostEventData>, List<BasicEventData>) CreateLight(List<float> Timing, float ColorOffset, float ColorSwap, bool AllowBackStrobe, bool AllowNeonStrobe, bool AllowSideStrobe, bool AllowFade, bool AllowSpinZoom, bool NerfStrobes, bool BoostLight)
+        internal static (List<ColorBoostEventData>, List<BasicEventData>) CreateLight(List<float> Timing, List<BurstSliderData> Slider, float ColorOffset, float ColorSwap, bool AllowBackStrobe, bool AllowNeonStrobe, bool AllowSideStrobe, bool AllowFade, bool AllowSpinZoom, bool NerfStrobes, bool BoostLight)
         {
             float last = new(); //Var to stop spin-stack and also used as time check.
             float[] time = new float[4]; //Now, before, before-before, before-before-before, in this order.
@@ -23,7 +23,7 @@ namespace Lolighter.Algorithm
             float lastCut = 0;
             int currentSpeed = 3;
             float lastSpeed = 0;
-            float nextfloat = 0;
+            float nextDouble = 0;
             bool firstSlider = false;
             float nextSlider = new();
             List<int> sliderLight = new() { 0, 1, 4 };
@@ -328,8 +328,8 @@ namespace Lolighter.Algorithm
                     continue;
                 }
 
-                // Find the next float
-                if (time[0] >= nextfloat)
+                // Find the next double
+                if (time[0] >= nextDouble)
                 {
                     for (int i = Timing.FindIndex(n => n == note); i < Timing.Count - 1; i++)
                     {
@@ -337,7 +337,7 @@ namespace Lolighter.Algorithm
                         {
                             if (Timing[i] == Timing[i - 1])
                             {
-                                nextfloat = Timing[i];
+                                nextDouble = Timing[i];
                                 break;
                             }
                         }
@@ -419,8 +419,8 @@ namespace Lolighter.Algorithm
 
                     wasSlider = true;
                 }
-                // Not a float
-                else if (time[0] != nextfloat)
+                // Not a double
+                else if (time[0] != nextDouble)
                 {
                     if (time[0] - time[1] >= lastSpeed + 0.02 || time[0] - time[1] <= lastSpeed - 0.02 || patternCount == 20) // New speed or 20 notes of the same pattern
                     {
@@ -465,17 +465,17 @@ namespace Lolighter.Algorithm
 
                     if (pattern[patternIndex] == 2)
                     {
-                        eventTempo.Add(new BasicEventData(time[0], EventType.LEFT, currentSpeed, 1));
+                        eventTempo.Add(new BasicEventData(time[0], EventType.LEFT_ROT, currentSpeed, 1));
                     }
                     else if (pattern[patternIndex] == 3)
                     {
-                        eventTempo.Add(new BasicEventData(time[0], EventType.RIGHT, currentSpeed, 1));
+                        eventTempo.Add(new BasicEventData(time[0], EventType.RIGHT_ROT, currentSpeed, 1));
                     }
 
                     // Place off event
                     if (Timing[^1] != note)
                     {
-                        if (Timing[Timing.FindIndex(n => n == note) + 1] == nextfloat)
+                        if (Timing[Timing.FindIndex(n => n == note) + 1] == nextDouble)
                         {
                             if (Timing[Timing.FindIndex(n => n == note) + 1] - time[0] <= 2)
                             {
@@ -542,6 +542,59 @@ namespace Lolighter.Algorithm
                 for (int i = 3; i > 0; i--) //Keep the timing of up to three notes before.
                 {
                     time[i] = time[i - 1];
+                }
+            }
+
+            ResetTimer();
+            sliderIndex = 0;
+
+            // Deal with chain
+            foreach (BurstSliderData chain in Slider)
+            {
+                // Take a light between neon, side or backlight and strobes it via On/Flash
+                if (sliderIndex == -1)
+                {
+                    int old = sliderLight[sliderIndex + 1];
+
+                    time[0] = chain.beat;
+
+                    TimerDuration();
+
+                    do
+                    {
+                        sliderLight.Shuffle();
+                    } while (sliderLight[2] == old);
+
+                    sliderIndex = 2;
+                }
+
+                // Place light
+                if (AllowFade)
+                {
+                    eventTempo.Add(new BasicEventData(chain.beat, sliderLight[sliderIndex], color - 2, 1));
+                    eventTempo.Add(new BasicEventData(chain.beat + 0.125f, sliderLight[sliderIndex], color - 1, 1));
+                    eventTempo.Add(new BasicEventData(chain.beat + 0.25f, sliderLight[sliderIndex], color - 2, 1));
+                    eventTempo.Add(new BasicEventData(chain.beat + 0.375f, sliderLight[sliderIndex], color - 1, 1));
+                }
+                else
+                {
+                    eventTempo.Add(new BasicEventData(chain.beat, sliderLight[sliderIndex], color, 1));
+                    eventTempo.Add(new BasicEventData(chain.beat + 0.125f, sliderLight[sliderIndex], color + 1, 1));
+                    eventTempo.Add(new BasicEventData(chain.beat + 0.25f, sliderLight[sliderIndex], color, 1));
+                    eventTempo.Add(new BasicEventData(chain.beat + 0.375f, sliderLight[sliderIndex], color + 1, 1));
+                }
+                eventTempo.Add(new BasicEventData(chain.beat + 0.5f, sliderLight[sliderIndex], 0, 1));
+
+                sliderIndex--;
+
+                // Spin goes brrr
+                if (AllowSpinZoom)
+                {
+                    eventTempo.Add(new BasicEventData(chain.beat, EventType.SPIN, 0, 1));
+                    for (int i = 0; i < 8; i++)
+                    {
+                        eventTempo.Add(new BasicEventData(chain.beat + 0.5f - (0.5f / 8f * i), EventType.SPIN, 0, 1));
+                    }
                 }
             }
 
