@@ -12,6 +12,8 @@ using System.Windows.Controls;
 using System.Diagnostics;
 using Microsoft.Win32;
 using Lolighter.Data.V2;
+using Microsoft.VisualBasic;
+using Lolighter.Info;
 
 namespace Lolighter
 {
@@ -25,7 +27,7 @@ namespace Lolighter
         // Ignore null value during serialization
         internal JsonSerializerOptions options = new();
         // Json data
-        internal InfoData? infoData = new();
+        internal InfoData infoData = new();
         internal List<DifficultyData> difficultyData = new();
         // Information on the difficulty
         internal List<DataItem> dataItem = new();
@@ -42,6 +44,7 @@ namespace Lolighter
 
             // Start
             OpenButton.Visibility = Visibility.Visible;
+            OpenAudio.Visibility = Visibility.Visible;
 
             // Prefill DataGrid
             for (int i = 1; i <= 3; ++i)
@@ -90,6 +93,7 @@ namespace Lolighter
         public void Transition()
         {
             OpenButton.Visibility = Visibility.Collapsed;
+            OpenAudio.Visibility = Visibility.Collapsed;
             DiffListBox.Visibility = Visibility.Visible;
             DiffListBox.Width = 150;
             DiffListBox.SelectedIndex = 0;
@@ -186,7 +190,8 @@ namespace Lolighter
                         catch (Exception)
                         {
                             MessageBox.Show("ERROR: Reading Info.dat");
-                            infoData = null;
+                            infoData = new();
+                            filePath = "";
                         }
 
                         if(infoData != null)
@@ -256,6 +261,7 @@ namespace Lolighter
                     else
                     {
                         MessageBox.Show("ERROR: Info.dat not selected");
+                        filePath = "";
                     }
                 }
             }
@@ -453,7 +459,7 @@ namespace Lolighter
 
         private void AutomapperButton_Click(object sender, RoutedEventArgs e)
         {
-            (difficultyData[DiffListBox.SelectedIndex].colorNotes, difficultyData[DiffListBox.SelectedIndex].burstSliders) = PatternCreator.Create(difficultyData[DiffListBox.SelectedIndex].colorNotes, "RandomStream", false, false, true);
+            (difficultyData[DiffListBox.SelectedIndex].colorNotes, difficultyData[DiffListBox.SelectedIndex].burstSliders) = PatternCreator.Create(difficultyData[DiffListBox.SelectedIndex].colorNotes, "RandomStream", false, false, true, false);
             difficultyData[DiffListBox.SelectedIndex].obstacles = new();
             difficultyData[DiffListBox.SelectedIndex].bombNotes = new();
             FillDataGrid(DiffListBox.SelectedIndex);
@@ -504,6 +510,123 @@ namespace Lolighter
             arc = Arc.CreateArc(difficultyData[DiffListBox.SelectedIndex].colorNotes);
             difficultyData[DiffListBox.SelectedIndex].sliders = arc;
             FillDataGrid(DiffListBox.SelectedIndex);
+        }
+
+        private void OpenAudio_Click(object sender, RoutedEventArgs e)
+        {
+            if (filePath == "") // No file are selected yet
+            {
+                OpenFileDialog openFileDialog = new();
+                openFileDialog.Filter = "*.mp3|*.mp3";
+                openFileDialog.Title = "Open audio";
+                openFileDialog.InitialDirectory = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Beat Saber\\Beat Saber_Data";
+                bool? result = openFileDialog.ShowDialog();
+                if (result == true)
+                {
+                    filePath = openFileDialog.FileName;
+                }
+            }
+            if (filePath != "") // A file is selected
+            {
+                var systemPath = Environment.
+                            GetFolderPath(
+                                Environment.SpecialFolder.CommonApplicationData
+                            );
+                var complete = Path.Combine(systemPath, "Lolighter");
+
+                Directory.CreateDirectory(complete);
+
+                File.Move(filePath, Path.GetDirectoryName(filePath) + "\\song.mp3");
+
+                filePath = Path.GetDirectoryName(filePath) + "\\song.mp3";
+
+                //MP3toOGG.ConvertToOgg(filePath, complete);
+
+                List<ColorNote> colorNotes = new();
+                List<BurstSliderData> burstSliders;
+
+                float bpm;
+
+                List<float> indistinguishableRange = new();
+                indistinguishableRange.Add(0.1f);       // 1809
+                indistinguishableRange.Add(0.003f);     // 1239
+                indistinguishableRange.Add(0.0015f);    // 740
+                indistinguishableRange.Add(0.001f);     // 546
+                indistinguishableRange.Add(0.0005f);    // 280
+
+                BPMDetector detector = new(filePath);
+                BPMGroup group = detector.Groups.Where(o => o.Count == detector.Groups.Max(o => o.Count)).First();
+                bpm = group.Tempo;
+                try
+                {
+                    bpm = float.Parse(Interaction.InputBox("Enter song BPM (if it's wrong)", "Automatic BPM detection", bpm.ToString()));
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("ERROR: Not a float");
+                    bpm = group.Tempo;
+                }
+
+                for (int i = 0; i < indistinguishableRange.Count; i++)
+                {
+                    colorNotes = new();
+                    burstSliders = new();
+
+                    (colorNotes, burstSliders) = Onset.GetMap(filePath, bpm, indistinguishableRange[i]);
+
+                    if(colorNotes.Count > 0)
+                    {
+                        // Create a new file
+                        difficultyData.Add(new(colorNotes));
+                        difficultyData[i].burstSliders = burstSliders;
+                    }
+                }
+
+
+                List<DifficultyBeatmaps> btList = new();
+                DifficultyBeatmaps difficultyBeatmaps = new("Easy", 1, "EasyStandard.dat", 12, 0, new(0, 0, "Zzz", null, null, null, null, null, null, null));
+                btList.Add(difficultyBeatmaps);
+                infoData._difficultyBeatmapSets.Add(new("Standard", btList));
+                infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("Normal", 3, "NormalStandard.dat", 14, 0, new(0, 0, "Acc", null, null, null, null, null, null, null)));
+                infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("Hard", 5, "HardStandard.dat", 16, 0, new(0, 0, "Decent", null, null, null, null, null, null, null)));
+                infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("Expert", 7, "ExpertStandard.dat", 18, 0, new(0, 0, "Good", null, null, null, null, null, null, null)));
+                infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("ExpertPlus", 9, "ExpertPlusStandard.dat", 20, 0, new(0, 0, "Overmapped", null, null, null, null, null, null, null)));
+                infoData._beatsPerMinute = bpm;
+
+                DiffListBox.Items.Clear();
+
+                for(int i = 0; i < difficultyData.Count(); i++)
+                {
+                    switch (i)
+                    {
+                        case 0: DiffListBox.Items.Add("ExpertPlusStandard.dat"); break;
+                        case 1: DiffListBox.Items.Add("ExpertStandard.dat"); break;
+                        case 2: DiffListBox.Items.Add("HardStandard.dat"); break;
+                        case 3: DiffListBox.Items.Add("NormalStandard.dat"); break;
+                        case 4: DiffListBox.Items.Add("EasyStandard.dat"); break;
+                    }
+
+                    List<string> temp = new();
+
+                    temp.Add(difficultyData[i].colorNotes.Count.ToString());
+                    temp.Add(difficultyData[i].bombNotes.Count.ToString());
+                    temp.Add(difficultyData[i].obstacles.Count.ToString());
+                    temp.Add(difficultyData[i].burstSliders.Count.ToString());
+                    temp.Add(difficultyData[i].sliders.Count.ToString());
+                    temp.Add(difficultyData[i].basicBeatmapEvents.Count.ToString());
+                    temp.Add(difficultyData[i].colorBoostBeatmapEvents.Count.ToString());
+
+                    oldData.Add(temp);
+                }
+                
+                DiffListBox.SelectedIndex = 0;
+
+                if (difficultyData[0].colorNotes.Count > 0)
+                {
+                    Transition();
+                    FillDataGrid(0);
+                }
+            }
         }
     }
 }

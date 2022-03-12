@@ -23,7 +23,7 @@ namespace Lolighter.Info
             {
                 do
                 {
-                    id = PatternCreator.RandNumber(0, 18);
+                    id = RandNumber(0, 18);
 
                 } while (id == patternID);
 
@@ -36,11 +36,11 @@ namespace Lolighter.Info
             switch (patternID)
             {
                 case 0: //Generic stream
-                    if (PatternCreator.RandNumber(0, 2) == 0)
+                    if (RandNumber(0, 2) == 0)
                     {
                         li = 2;
                     }
-                    else if (PatternCreator.RandNumber(0, 2) == 0)
+                    else if (RandNumber(0, 2) == 0)
                     {
                         li = 3;
                     }
@@ -257,7 +257,7 @@ namespace Lolighter.Info
                     break;
                 case 12: //Triple triple
                     int i;
-                    if (PatternCreator.RandNumber(0, 2) == 0)
+                    if (RandNumber(0, 2) == 0)
                     {
                         i = 0;
                     }
@@ -387,7 +387,7 @@ namespace Lolighter.Info
 
             for (int i = 0; i < 4; i++)
             {
-                int line = PatternCreator.RandNumber(0, 4);
+                int line = RandNumber(0, 4);
 
                 ColorNote note = new ColorNote(0, line, Layer.BOTTOM, color, cut);
                 random.Add(note);
@@ -425,7 +425,7 @@ namespace Lolighter.Info
             {
                 do
                 {
-                    id = PatternCreator.RandNumber(0, 18);
+                    id = RandNumber(0, 18);
                 } while (id == patternID);
 
                 patternID = id;

@@ -80,9 +80,83 @@ namespace Lolighter.Data
                 lightRotationEventBoxGroups = new();
             }
             this.lightRotationEventBoxGroups = lightRotationEventBoxGroups;
+            if (basicEventTypesWithKeywords == null)
+            {
+                basicEventTypesWithKeywords = new(new());
+            }
             this.basicEventTypesWithKeywords = basicEventTypesWithKeywords;
             this.useNormalEventsAsCompatibleEvents = useNormalEventsAsCompatibleEvents;
+            if (customData == null)
+            {
+                customData = new();
+            }
             this.customData = customData;
+        }
+
+        public DifficultyData(List<ColorNote> note)
+        {
+            if (version == null)
+            {
+                version = "3.0.0";
+            }
+            if (bpmEvents == null)
+            {
+                bpmEvents = new();
+            }
+            if (rotationEvents == null)
+            {
+                rotationEvents = new();
+            }
+            if (colorNotes == null)
+            {
+                colorNotes = new();
+            }
+            this.colorNotes = note;
+            if (bombNotes == null)
+            {
+                bombNotes = new();
+            }
+            if (obstacles == null)
+            {
+                obstacles = new();
+            }
+            if (sliders == null)
+            {
+                sliders = new();
+            }
+            if (burstSliders == null)
+            {
+                burstSliders = new();
+            }
+            if (waypoints == null)
+            {
+                waypoints = new();
+            }
+            if (basicBeatmapEvents == null)
+            {
+                basicBeatmapEvents = new();
+            }
+            if (colorBoostBeatmapEvents == null)
+            {
+                colorBoostBeatmapEvents = new();
+            }
+            if (lightColorEventBoxGroups == null)
+            {
+                lightColorEventBoxGroups = new();
+            }
+            if (lightRotationEventBoxGroups == null)
+            {
+                lightRotationEventBoxGroups = new();
+            }
+            if (basicEventTypesWithKeywords == null)
+            {
+                basicEventTypesWithKeywords = new(new());
+            }
+            this.useNormalEventsAsCompatibleEvents = true;
+            if (customData == null)
+            {
+                customData = new();
+            }
         }
 
         [JsonInclude]
