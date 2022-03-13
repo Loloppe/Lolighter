@@ -1,6 +1,7 @@
 ﻿using Lolighter.Data.Structure;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace Lolighter.Data.V2
@@ -62,6 +63,13 @@ namespace Lolighter.Data.V2
             {
                 notes.Add(new(nt));
             }
+            foreach (var bomb in diff.bombNotes)
+            {
+                notes.Add(new(bomb));
+            }
+
+            notes = notes.OrderBy(o => o._time).ToList();
+
             this._notes = notes;
 
             List<Obstacles> obs = new();
@@ -238,6 +246,15 @@ namespace Lolighter.Data.V2
             this._lineLayer = note.layer;
             this._type = note.color;
             this._cutDirection = note.direction;
+        }
+
+        public Notes(BombNote note)
+        {
+            this._time = note.beat;
+            this._lineIndex = note.line;
+            this._lineLayer = note.layer;
+            this._type = 3;
+            this._cutDirection = 0;
         }
 
         public float _time { get; set; }
