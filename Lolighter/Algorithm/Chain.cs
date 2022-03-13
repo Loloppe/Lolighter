@@ -1,18 +1,22 @@
 ﻿using Lolighter.Data.Structure;
 using System.Collections.Generic;
-using System.Linq;
 using static Lolighter.Info.Helper;
 
 namespace Lolighter.Algorithm
 {
     class Chain
     {
-        static public (List<BurstSliderData>, List<ColorNote>) Chains(List<ColorNote> noteTemp, int size = 4)
+        static public (List<BurstSliderData>, List<ColorNote>) Chains(List<ColorNote> noteTemp)
         {
+            // List of newly created Chain
             List<BurstSliderData> burstSliders = new();
 
+            // List to separate each note per type
             List<ColorNote> red = new();
             List<ColorNote> blue = new();
+
+            // Size of the chain
+            int size = 4;
 
             foreach (ColorNote note in noteTemp)
             {
@@ -26,99 +30,24 @@ namespace Lolighter.Algorithm
                 }
             }
 
-            List<List<ColorNote>> others = new();
-            List<ColorNote> other = new();
-            bool found = false;
+            // List of list to keep thing like sliders/stack/window/tower etc
+            List<List<ColorNote>> patterns = new();
+            List<List<ColorNote>> tempList = new();
 
-            // Find all blue sliders/stack/window/tower
-            for (int i = 0; i < blue.Count; i++)
-            {
-                if (i == blue.Count - 1)
-                {
-                    if (found)
-                    {
-                        other.Add(new(blue[i]));
-                        blue.RemoveAt(i);
-                        others.Add(new(other));
-                        found = false;
-                    }
-                    break;
-                }
-                ColorNote now = blue[i];
-                ColorNote next = blue[i + 1];
+            // Find pattern here
+            (patterns, blue) = FindPattern(blue);
+            (tempList, red) = FindPattern(red);
+            patterns.AddRange(tempList);
 
-                if (next.beat - now.beat >= 0 && next.beat - now.beat < 0.1)
-                {
-                    if (!found)
-                    {
-                        other = new();
-                        found = true;
-                    }
-                    other.Add(new(blue[i]));
-                    blue.RemoveAt(i);
-                    i--;
-                }
-                else
-                {
-                    if (found)
-                    {
-                        other.Add(new(blue[i]));
-                        blue.RemoveAt(i);
-                        i--;
-                        others.Add(new(other));
-                    }
-
-                    found = false;
-                }
-            }
-
-            // find all red sliders/stack/window/tower
-            for (int i = 0; i < red.Count; i++)
-            {
-                if (i == red.Count - 1)
-                {
-                    if (found)
-                    {
-                        other.Add(new(red[i]));
-                        red.RemoveAt(i);
-                        others.Add(new(other));
-                    }
-                    break;
-                }
-                ColorNote now = red[i];
-                ColorNote next = red[i + 1];
-
-                if (next.beat - now.beat >= 0 && next.beat - now.beat < 0.1)
-                {
-                    if (!found)
-                    {
-                        other = new();
-                        found = true;
-                    }
-                    other.Add(new(red[i]));
-                    red.RemoveAt(i);
-                    i--;
-                }
-                else
-                {
-                    if (found)
-                    {
-                        other.Add(new(red[i]));
-                        red.RemoveAt(i);
-                        i--;
-                        others.Add(new(other));
-                    }
-
-                    found = false;
-                }
-            }
-
+            // Add back the notes together
             List<ColorNote> temp = new(blue);
             temp.AddRange(red);
 
             // Create chain for the remaining notes
             foreach (ColorNote now in temp)
             {
+                size = RandNumber(4, 9);
+
                 switch (now.layer) //Process the note into a sliders depending on layer, lane and cut direction manually. This is pretty Pepega.
                 {
                     case Layer.BOTTOM:
@@ -358,15 +287,15 @@ namespace Lolighter.Algorithm
             }
 
             // Turn all sliders/stack/window/tower into chain
-            for (int i = 0; i < others.Count; i++)
+            for (int i = 0; i < patterns.Count; i++)
             {
                 List<bool> count = new();
                 int head = 0;
                 int tail = 0;
                 int direction = 8;
 
-                // Find general cut direction
-                foreach (ColorNote note in others[i])
+                // Find general cut direction of the chain
+                foreach (ColorNote note in patterns[i])
                 {
                     if(direction == 8 && note.direction == CutDirection.ANY)
                     {
@@ -402,16 +331,17 @@ namespace Lolighter.Algorithm
                     }
                 }
 
-                // Logic only handle up to 3 notes
-                for (int j = 0; j < others[i].Count - 1; j++)
+                // Logic to find the Head and Tail, up to three notes
+                for (int j = 0; j < patterns[i].Count - 1; j++)
                 {
-                    count.Add(PossibleHead(others[i][j], others[i][j + 1], direction));
-                    if(j == others[i].Count - 1)
+                    count.Add(PossibleHead(patterns[i][j], patterns[i][j + 1], direction));
+                    if(j == patterns[i].Count - 1)
                     {
-                        count.Add(PossibleHead(others[i][j + 1], others[i][j + 2], direction));
+                        count.Add(PossibleHead(patterns[i][j + 1], patterns[i][j + 2], direction));
                     }
                 }
 
+                // Apply the proper note as Head and Tail of the chain
                 if(count.Count >= 3)
                 {
                     if (count[0] == true && count[1] == true && count[2] == false)
@@ -456,19 +386,22 @@ namespace Lolighter.Algorithm
                     tail = 0;
                 }
 
-                if (others[i][head].color == ColorType.BLUE)
+                // Add a note at the Head of the chain (or it will be empty)
+                if (patterns[i][head].color == ColorType.BLUE)
                 {
-                    blue.Add(others[i][head]);
+                    blue.Add(patterns[i][head]);
                 }
-                else if (others[i][head].color == ColorType.RED)
+                else if (patterns[i][head].color == ColorType.RED)
                 {
-                    red.Add(others[i][head]);
+                    red.Add(patterns[i][head]);
                 }
 
-                BurstSliderData newSlider = new(others[i][head], others[i][tail].beat, others[i][tail].line, others[i][tail].layer, size, 0.8f);
+                // Create the chain
+                BurstSliderData newSlider = new(patterns[i][head], patterns[i][tail].beat, patterns[i][tail].line, patterns[i][tail].layer, size, 0.8f);
                 burstSliders.Add(newSlider);
             }
 
+            // Remake the list of notes (to trim out pattern)
             noteTemp = new(blue);
             noteTemp.AddRange(red);
 

@@ -1,5 +1,4 @@
-﻿using Lolighter.Data.Structure;
-using Lolighter.Data.V2;
+﻿using Lolighter.Data.V2;
 using System.Collections.Generic;
 
 namespace Lolighter.Info

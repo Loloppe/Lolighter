@@ -282,22 +282,12 @@ namespace Lolighter
         /// <param name="e"></param>
         private void Light_Click(object sender, RoutedEventArgs e)
         {
-            List<float> timing = new();
-            float offset = 0f;
-            float colorSwap = 4f;
-            bool allowBackLight = true;
-            bool allowNeonLight = true;
-            bool allowSideLight = true;
-            bool allowFade = true;
-            bool allowSpinZoom = true;
+            List<ColorNote> timing = new();
             bool nerfStrobes = false;
             bool applyToAll = false;
             bool boostLight = false;
 
-            foreach(var note in difficultyData[DiffListBox.SelectedIndex].colorNotes)
-            {
-                timing.Add(note.beat);
-            }
+            timing.AddRange(difficultyData[DiffListBox.SelectedIndex].colorNotes);
 
             MessageBoxResult messageBoxResult = MessageBox.Show("Do you want to apply this Lightshow to all the difficulty?", "Light", MessageBoxButton.YesNo);
             if (messageBoxResult == MessageBoxResult.Yes)
@@ -310,9 +300,9 @@ namespace Lolighter
             {
                 foreach (var bomb in difficultyData[DiffListBox.SelectedIndex].bombNotes)
                 {
-                    timing.Add(bomb.beat);
+                    timing.Add(new(bomb));
                 }
-                timing.Sort();
+                timing.OrderBy(o => o.beat);
             }
 
             messageBoxResult = MessageBox.Show("Do you want to reduce strobes?", "Light", MessageBoxButton.YesNo);
@@ -331,7 +321,7 @@ namespace Lolighter
             List<BasicEventData> basicEvents;
             List<BurstSliderData> burstSliderData = new(difficultyData[DiffListBox.SelectedIndex].burstSliders);
 
-            (boostEvents, basicEvents) = Light.CreateLight(timing, burstSliderData, offset, colorSwap, allowBackLight, allowNeonLight, allowSideLight, allowFade, allowSpinZoom, nerfStrobes, boostLight);
+            (boostEvents, basicEvents) = Light.CreateLight(timing, burstSliderData, nerfStrobes, boostLight);
 
             difficultyData[DiffListBox.SelectedIndex].colorBoostBeatmapEvents = boostEvents;
             difficultyData[DiffListBox.SelectedIndex].basicBeatmapEvents = basicEvents;
@@ -540,7 +530,7 @@ namespace Lolighter
 
                 filePath = Path.GetDirectoryName(filePath) + "\\song.mp3";
 
-                //MP3toOGG.ConvertToOgg(filePath, complete);
+                MP3toOGG.ConvertToOgg(filePath, complete);
 
                 List<ColorNote> colorNotes = new();
                 List<BurstSliderData> burstSliders;
@@ -548,11 +538,9 @@ namespace Lolighter
                 float bpm;
 
                 List<float> indistinguishableRange = new();
-                indistinguishableRange.Add(0.1f);       // 1809
-                indistinguishableRange.Add(0.003f);     // 1239
-                indistinguishableRange.Add(0.0015f);    // 740
-                indistinguishableRange.Add(0.001f);     // 546
-                indistinguishableRange.Add(0.0005f);    // 280
+                indistinguishableRange.Add(0.005f);     // Overmapped (a bit)
+                indistinguishableRange.Add(0.003f);     // Very good
+                indistinguishableRange.Add(0.0015f);    // Good
 
                 BPMDetector detector = new(filePath);
                 BPMGroup group = detector.Groups.Where(o => o.Count == detector.Groups.Max(o => o.Count)).First();
@@ -563,7 +551,6 @@ namespace Lolighter
                 }
                 catch (Exception)
                 {
-                    MessageBox.Show("ERROR: Not a float");
                     bpm = group.Tempo;
                 }
 
@@ -584,11 +571,9 @@ namespace Lolighter
 
 
                 List<DifficultyBeatmaps> btList = new();
-                DifficultyBeatmaps difficultyBeatmaps = new("Easy", 1, "EasyStandard.dat", 12, 0, new(0, 0, "Zzz", null, null, null, null, null, null, null));
+                DifficultyBeatmaps difficultyBeatmaps = new("Hard", 5, "HardStandard.dat", 16, 0, new(0, 0, "Decent", null, null, null, null, null, null, null));
                 btList.Add(difficultyBeatmaps);
                 infoData._difficultyBeatmapSets.Add(new("Standard", btList));
-                infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("Normal", 3, "NormalStandard.dat", 14, 0, new(0, 0, "Acc", null, null, null, null, null, null, null)));
-                infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("Hard", 5, "HardStandard.dat", 16, 0, new(0, 0, "Decent", null, null, null, null, null, null, null)));
                 infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("Expert", 7, "ExpertStandard.dat", 18, 0, new(0, 0, "Good", null, null, null, null, null, null, null)));
                 infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("ExpertPlus", 9, "ExpertPlusStandard.dat", 20, 0, new(0, 0, "Overmapped", null, null, null, null, null, null, null)));
                 infoData._beatsPerMinute = bpm;
@@ -621,7 +606,7 @@ namespace Lolighter
                 
                 DiffListBox.SelectedIndex = 0;
 
-                if (difficultyData[0].colorNotes.Count > 0)
+                if (difficultyData.Count > 0)
                 {
                     Transition();
                     FillDataGrid(0);

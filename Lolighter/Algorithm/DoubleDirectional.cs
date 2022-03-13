@@ -1,5 +1,4 @@
 ﻿using Lolighter.Data.Structure;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Lolighter.Info.Helper;
@@ -10,11 +9,14 @@ namespace Lolighter.Algorithm
     {
         static public (List<ColorNote>, List<BurstSliderData>) Emilia(List<ColorNote> noteTemp, bool IsLimited, bool removeSide)
         {
+            // List to keep new Chain (converted from pattern)
             List<BurstSliderData> burstSliders = new();
 
+            // List to hold note per type
             List<ColorNote> red = new();
             List<ColorNote> blue = new();
 
+            // Remove all "up swing", otherwise modify their direction
             for (int i = 0; i < noteTemp.Count; i++)
             {
                 ColorNote note = noteTemp[i];
@@ -29,6 +31,7 @@ namespace Lolighter.Algorithm
                 }
             }
 
+            // Separate note per type
             foreach (ColorNote note in noteTemp)
             {
                 if(note.color == ColorType.BLUE)
@@ -41,11 +44,12 @@ namespace Lolighter.Algorithm
                 }
             }
 
+            // Find all sliders, stacks, tower, etc. to turn them into down Chain or to modify them accordingly
             List<List<ColorNote>> sliders = new();
             List<ColorNote> slider = new();
             bool found = false;
 
-            // Find all blue sliders
+            // Find all blue pattern
             for (int i = 0; i < blue.Count; i++)
             {
                 if (i == blue.Count - 1)
@@ -157,7 +161,7 @@ namespace Lolighter.Algorithm
                 }
             }
 
-            // Find all red sliders
+            // Find all red patterns
             for (int i = 0; i < red.Count; i++)
             {
                 if (i == red.Count - 1)
@@ -269,7 +273,7 @@ namespace Lolighter.Algorithm
                 }
             }
 
-            // Fix sliders
+            // Turn slider into chain
             for (int i = 0; i < sliders.Count; i++)
             {
                 if (sliders[i].First().color == ColorType.BLUE)
@@ -300,11 +304,12 @@ namespace Lolighter.Algorithm
                     sliders[i].First().line = temp;
                 }
 
-                int size = 4;
+                int size = RandNumber(4, 9);
                 BurstSliderData newSlider = new(sliders[i].First(), sliders[i].Last().beat, sliders[i].Last().line, sliders[i].Last().layer, size, 0.8f);
                 burstSliders.Add(newSlider);
             }
 
+            // Create a new list with the new notes
             noteTemp = new(blue);
             noteTemp.AddRange(red);
 

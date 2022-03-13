@@ -7,49 +7,70 @@ namespace Lolighter.Algorithm
 {
     internal static class Light
     {
-        internal static (List<ColorBoostEventData>, List<BasicEventData>) CreateLight(List<float> Timing, List<BurstSliderData> Slider, float ColorOffset, float ColorSwap, bool AllowBackStrobe, bool AllowNeonStrobe, bool AllowSideStrobe, bool AllowFade, bool AllowSpinZoom, bool NerfStrobes, bool BoostLight)
+        internal static (List<ColorBoostEventData>, List<BasicEventData>) CreateLight(List<ColorNote> Notes, List<BurstSliderData> Slider, bool NerfStrobes, bool BoostLight)
         {
-            float last = new(); //Var to stop spin-stack and also used as time check.
-            float[] time = new float[4]; //Now, before, before-before, before-before-before, in this order.
-            //0.0D = Default value for float, similar to NULL for int.
-            int[] light = new int[3]; //Now, before, before-before.
-            int lastLight = 0;
-            float offset;
+            // Bunch of var to keep timing in check
+            float last = new(); 
+            float[] time = new float[4];
+            int[] light = new int[3];
+            float offset = Notes[0].beat;
             float firstNote = 0;
-            float timer = 0; //Timer start on the first note.
-            int count; //Light counter, stop at maximum.
-            int maximum = 2; //Maximum number of light per same time.
-            int color; //Set color start value.
-            float lastCut = 0;
+            float timer = 0;
+
+            //Light counter, stop at maximum.
+            int count; 
+
+            //Set color start value.
+            int color; 
+
+            // For laser speed
             int currentSpeed = 3;
+
+            // Rhythm check
             float lastSpeed = 0;
+
+            // To not light up Double twice
             float nextDouble = 0;
+
+            // Slider stuff
             bool firstSlider = false;
             float nextSlider = new();
-            List<int> sliderLight = new() { 0, 1, 4 };
+            List<int> sliderLight = new() { 4, 1, 0 };
             int sliderIndex = 0;
             float sliderNoteCount = 0;
             bool wasSlider = false;
+
+            // Pattern for specific rhythm
             List<int> pattern = new(Enumerable.Range(0, 5));
             int patternIndex = 0;
             int patternCount = 0;
+
+            // The new events
             List<BasicEventData> eventTempo = new();
             List<ColorBoostEventData> boostEvent = new();
+
+            // Is the section currently using Boost Event
             bool boost = true;
             float boostSwap = 8;
             float boostIncrement = 0;
 
+            // If double notes lights are on
+            bool doubleOn = false;
+
+            // Make sure this is the right timing for color swap with Boost Event
+            float ColorOffset = 0;
+            float ColorSwap = 4;
+
+            // To make sure that slider doesn't apply as double
+            List<ColorNote> sliderTiming = new();
+
+            // Order note, necessary if we're converting V3 bomb from notes
+            Notes = Notes.OrderBy(o => o.beat).ToList();
+
             void ResetTimer() //Pretty much reset everything necessary.
             {
-                if (AllowFade)
-                {
-                    color = EventLightValue.BLUE_FADE; //Blue Fade
-                }
-                else
-                {
-                    color = EventLightValue.BLUE_ON; //Blue On
-                }
-                firstNote = Timing[0];
+                color = EventLightValue.BLUE_FADE; //Blue Fade
+                firstNote = Notes[0].beat;
                 offset = firstNote;
                 count = 0;
                 for (int i = 0; i < 2; i++)
@@ -83,76 +104,38 @@ namespace Lolighter.Algorithm
                 }
             }
 
-            void CreateGenericLight(int speed) //Receive laser speed as var.
-            {
-                if (time[0] == time[1]) //Same beat
-                {
-                    if (count < maximum) //Maximum laser is 2
-                    {
-                        count++;
-                    }
-                }
-                else
-                {
-                    count = 0; //Reset the count, we are moving forward (in time).
-                    for (int i = 0; i < 2; i++)
-                    {
-                        if (light[i] != 0 && time[0] - time[1] <= 2.5) //TODO: Re-add as an option left/right laser strobe.
-                        {
-                            //eventTempo.Add(new BasicEvent((time[0] - (time[0] - time[1]) / 2), light[i], 0));
-                        }
-                        light[i] = 0;
-                    }
-                }
-
-                if (count == maximum) //If count reach the maximum, we skip this.
-                {
-                    return;
-                }
-
-                if (light[0] != 0)
-                {
-                    light[1] = light[0];
-                }
-
-                if (lastLight == 2) //We swap between laser
-                {
-                    light[0] = 3;
-                }
-                else
-                {
-                    light[0] = 2;
-                }
-
-                switch (light[0]) //Add laser + speed
-                {
-                    case 2:
-                        eventTempo.Add(new BasicEventData(time[0], EventType.LEFT, color, 1));
-                        eventTempo.Add(new BasicEventData(time[0], EventType.LEFT_ROT, speed, 1));
-                        break;
-                    case 3:
-                        eventTempo.Add(new BasicEventData(time[0], EventType.RIGHT, color, 1));
-                        eventTempo.Add(new BasicEventData(time[0], EventType.RIGHT_ROT, speed, 1));
-                        break;
-                }
-
-                lastLight = light[0];
-            }
-
             ResetTimer();
 
-            foreach (float note in Timing) //Process specific light (Side/Neon) using time.
+            bool found = false;
+
+            // Find all sliders
+            for(int i = 1; i < Notes.Count; i++)
             {
-                float now = note;
+                // Between 1/8 and 0, same cut direction or dots
+                if (Notes[i].beat - Notes[i - 1].beat <= 0.125 && Notes[i].beat - Notes[i - 1].beat > 0 && (Notes[i].direction == Notes[i - 1].direction || Notes[i].direction == 8 || Notes[i - 1].direction == 8))
+                {
+                    sliderTiming.Add(Notes[i - 1]);
+                    found = true;
+                }
+                else if(found)
+                {
+                    sliderTiming.Add(Notes[i - 1]);
+                    found = false;
+                }
+            }
+
+            foreach (ColorNote note in Notes) //Process specific light (Side/Neon) using time.
+            {
+                float now = note.beat;
                 time[0] = now;
 
                 //Here we process Spin and Zoom
-                if (now == firstNote && time[1] == 0.0D && AllowSpinZoom) //If we are processing the first note, add spin + zoom to it.
+                if (now == firstNote && time[1] == 0.0D) //If we are processing the first note, add spin + zoom to it.
                 {
                     eventTempo.Add(new BasicEventData(now, EventType.SPIN, 0, 1));
                     eventTempo.Add(new BasicEventData(now, EventType.ZOOM, 0, 1));
                 }
-                else if (now >= ColorOffset + ColorSwap + offset && now > firstNote && AllowSpinZoom) //If we are reaching the next threshold of the timer
+                else if (now >= ColorOffset + ColorSwap + offset && now > firstNote) //If we are reaching the next threshold of the timer
                 {
                     //Add a spin at timer.
                     eventTempo.Add(new BasicEventData(offset, EventType.SPIN, 0, 1));
@@ -167,7 +150,7 @@ namespace Lolighter.Algorithm
                     }
                 }
                 //If there's a quarter between two float parallel notes and timer didn't pass the check.
-                else if (time[1] - time[2] == 0.25 && time[3] == time[2] && time[1] == now && timer < offset && AllowSpinZoom)
+                else if (time[1] - time[2] == 0.25 && time[3] == time[2] && time[1] == now && timer < offset)
                 {
                     eventTempo.Add(new BasicEventData(now, EventType.SPIN, 0, 1));
                 }
@@ -189,46 +172,60 @@ namespace Lolighter.Algorithm
 
                 TimerDuration();
 
-                if ((now == time[1] || (now - time[1] <= 0.02 && time[1] != time[2])) && (time[1] != 0.0D && now != last)) //If not same note, same beat, apply once.
+                if (!NerfStrobes && doubleOn) //Off event
                 {
-                    if (!NerfStrobes) //Off event
+                    if (now - last >= 1)
                     {
-                        if (now - last >= 0.5)
-                        {
-                            if (AllowBackStrobe) //Back Top Laser
-                            {
-                                eventTempo.Add(new BasicEventData(now + 0.25f, EventType.BACK, 0, 1));
-                            }
-                            if (AllowNeonStrobe) //Neon Light
-                            {
-                                eventTempo.Add(new BasicEventData(now + 0.25f, EventType.RING, 0, 1));
-                            }
-                            if (AllowSideStrobe) //Side Light
-                            {
-                                eventTempo.Add(new BasicEventData(now + 0.25f, EventType.SIDE, 0, 1));
-                            }
-                        }
-                        else
-                        {
-                            if (AllowBackStrobe) //Back Top Laser
-                            {
-                                eventTempo.Add(new BasicEventData(now - (now - last) / 2, EventType.BACK, 0, 1));
-                            }
-                            if (AllowNeonStrobe) //Neon Light
-                            {
-                                eventTempo.Add(new BasicEventData(now - (now - last) / 2, EventType.RING, 0, 1));
-                            }
-                            if (AllowSideStrobe) //Side Light
-                            {
-                                eventTempo.Add(new BasicEventData(now - (now - last) / 2, EventType.SIDE, 0, 1));
-                            }
-                        }
+                        eventTempo.Add(new BasicEventData(now - (now - last) / 2, EventType.BACK, 0, 1));
+                        eventTempo.Add(new BasicEventData(now - (now - last) / 2, EventType.RING, 0, 1));
+                        eventTempo.Add(new BasicEventData(now - (now - last) / 2, EventType.SIDE, 0, 1));
+                        eventTempo.Add(new BasicEventData(now - (now - last) / 2, EventType.LEFT, 0, 1));
+                        eventTempo.Add(new BasicEventData(now - (now - last) / 2, EventType.RIGHT, 0, 1));
+                    }
+                    else
+                    {
+                        // Will be fused with some events, but we will sort that out later on.
+                        eventTempo.Add(new BasicEventData(now, EventType.BACK, 0, 1));
+                        eventTempo.Add(new BasicEventData(now, EventType.RING, 0, 1));
+                        eventTempo.Add(new BasicEventData(now, EventType.SIDE, 0, 1));
+                        eventTempo.Add(new BasicEventData(now, EventType.LEFT, 0, 1));
+                        eventTempo.Add(new BasicEventData(now, EventType.RIGHT, 0, 1));
                     }
 
+                    doubleOn = false;
+                }
+
+                //If not same note, same beat and not slider, apply once.
+                if ((now == time[1] || (now - time[1] <= 0.02 && time[1] != time[2])) && (time[1] != 0.0D && now != last) && !sliderTiming.Exists(e => e.beat == now))
+                {
                     eventTempo.Add(new BasicEventData(now, EventType.BACK, color, 1)); //Back Top Laser
                     eventTempo.Add(new BasicEventData(now, EventType.RING, color, 1)); //Track Ring Neons
                     eventTempo.Add(new BasicEventData(now, EventType.SIDE, color, 1)); //Side Light
+                    eventTempo.Add(new BasicEventData(now, EventType.LEFT, color, 1)); //Left Laser
+                    eventTempo.Add(new BasicEventData(now, EventType.RIGHT, color, 1)); //Right Laser
 
+                    // Laser speed based on rhythm
+                    if (time[0] - time[1] < 0.25)
+                    {
+                        currentSpeed = 7;
+                    }
+                    else if (time[0] - time[1] >= 0.25 && time[0] - time[1] < 0.5)
+                    {
+                        currentSpeed = 5;
+                    }
+                    else if (time[0] - time[1] >= 0.5 && time[0] - time[1] < 1)
+                    {
+                        currentSpeed = 3;
+                    }
+                    else
+                    {
+                        currentSpeed = 1;
+                    }
+
+                    eventTempo.Add(new BasicEventData(now + 0.01f, EventType.LEFT_ROT, currentSpeed, 1)); //Left Rotation
+                    eventTempo.Add(new BasicEventData(now + 0.01f, EventType.RIGHT_ROT, currentSpeed, 1)); //Right Rotation
+
+                    doubleOn = true;
                     last = now;
                 }
 
@@ -238,6 +235,9 @@ namespace Lolighter.Algorithm
                 }
             }
 
+            nextSlider = new();
+
+            // Convert quick light color swap
             if (NerfStrobes)
             {
                 float lastTimeTop = 100;
@@ -275,9 +275,9 @@ namespace Lolighter.Algorithm
 
             ResetTimer();
 
-            foreach (float note in Timing) //Process all note using time.
+            foreach (ColorNote note in Notes) //Process all note using time.
             {
-                time[0] = note;
+                time[0] = note.beat;
 
                 TimerDuration();
 
@@ -286,7 +286,6 @@ namespace Lolighter.Algorithm
                     if (sliderNoteCount != 0)
                     {
                         sliderNoteCount--;
-                        lastCut = note; //For the spin check.
 
                         for (int i = 3; i > 0; i--) //Keep the timing of up to three notes before.
                         {
@@ -300,28 +299,6 @@ namespace Lolighter.Algorithm
                     }
                 }
 
-                if (time[2] == 0.0D) //No third note processed yet.
-                {
-                    if (time[1] == 0.0D) //No second note processed yet.
-                    {
-                        time[1] = time[0]; //Skip first note.
-                        continue;
-                    }
-                    else //The second note is processed a very specific way.
-                    {
-                        if (!firstSlider)
-                        {
-                            eventTempo.Add(new BasicEventData(time[0], EventType.RIGHT, color, 1));
-                            eventTempo.Add(new BasicEventData(0, EventType.RIGHT_ROT, 1, 1));
-                            eventTempo.Add(new BasicEventData(time[1], EventType.LEFT, color, 1));
-                            eventTempo.Add(new BasicEventData(0, EventType.LEFT_ROT, 1, 1));
-                        }
-                        time[2] = time[1];
-                        time[1] = time[0];
-                        continue;
-                    }
-                }
-
                 if (firstSlider)
                 {
                     firstSlider = false;
@@ -331,36 +308,36 @@ namespace Lolighter.Algorithm
                 // Find the next double
                 if (time[0] >= nextDouble)
                 {
-                    for (int i = Timing.FindIndex(n => n == note); i < Timing.Count - 1; i++)
+                    for (int i = Notes.FindIndex(n => n == note); i < Notes.Count - 1; i++)
                     {
                         if(i != 0)
                         {
-                            if (Timing[i] == Timing[i - 1])
+                            if (Notes[i].beat == Notes[i - 1].beat)
                             {
-                                nextDouble = Timing[i];
+                                nextDouble = Notes[i].beat;
                                 break;
                             }
                         }
                     }
                 }
 
-                // Find the next slider (1/8 minimum)
+                // Find the next slider (1/8 minimum) or chain
                 if (time[0] >= nextSlider)
                 {
                     sliderNoteCount = 0;
 
-                    for (int i = Timing.FindIndex(n => n == note); i < Timing.Count - 1; i++)
+                    for (int i = Notes.FindIndex(n => n == note); i < Notes.Count - 1; i++)
                     {
-                        if(i != 0)
+                        if(i != 0 && i < Notes.Count)
                         {
                             // Between 1/8 and 0, same cut direction or dots
-                            if (Timing[i] - Timing[i - 1] <= 0.125 && Timing[i] - Timing[i - 1] > 0 && (Timing[i] == Timing[i - 1] || Timing[i] == 8))
+                            if (Notes[i].beat - Notes[i - 1].beat <= 0.125 && Notes[i].beat - Notes[i - 1].beat > 0 && (Notes[i].direction == Notes[i - 1].direction || Notes[i].direction == 8))
                             {
                                 // Search for the last note of the slider
                                 if (sliderNoteCount == 0)
                                 {
                                     // This is the first note of the slider
-                                    nextSlider = Timing[i - 1];
+                                    nextSlider = Notes[i - 1].beat;
                                 }
                                 sliderNoteCount++;
                             }
@@ -372,49 +349,29 @@ namespace Lolighter.Algorithm
                     }
                 }
 
-                // Slider time
-                if (nextSlider == note)
+                // It's the next slider or chain
+                if ((nextSlider == note.beat) || Slider.Exists(o => o.beat == time[0]))
                 {
                     // Take a light between neon, side or backlight and strobes it via On/Flash
-                    if (sliderIndex == -1)
+                    if(sliderIndex == -1)
                     {
-                        int old = sliderLight[sliderIndex + 1];
-
-                        do
-                        {
-                            sliderLight.Shuffle();
-                        } while (sliderLight[2] == old);
-
                         sliderIndex = 2;
                     }
 
                     // Place light
-                    if (AllowFade)
-                    {
-                        eventTempo.Add(new BasicEventData(time[0], sliderLight[sliderIndex], color - 2, 1));
-                        eventTempo.Add(new BasicEventData(time[0] + 0.125f, sliderLight[sliderIndex], color - 1, 1));
-                        eventTempo.Add(new BasicEventData(time[0] + 0.25f, sliderLight[sliderIndex], color - 2, 1));
-                        eventTempo.Add(new BasicEventData(time[0] + 0.375f, sliderLight[sliderIndex], color - 1, 1));
-                    }
-                    else
-                    {
-                        eventTempo.Add(new BasicEventData(time[0], sliderLight[sliderIndex], color, 1));
-                        eventTempo.Add(new BasicEventData(time[0] + 0.125f, sliderLight[sliderIndex], color + 1, 1));
-                        eventTempo.Add(new BasicEventData(time[0] + 0.25f, sliderLight[sliderIndex], color, 1));
-                        eventTempo.Add(new BasicEventData(time[0] + 0.375f, sliderLight[sliderIndex], color + 1, 1));
-                    }
+                    eventTempo.Add(new BasicEventData(time[0], sliderLight[sliderIndex], color - 2, 1));
+                    eventTempo.Add(new BasicEventData(time[0] + 0.125f, sliderLight[sliderIndex], color - 1, 1));
+                    eventTempo.Add(new BasicEventData(time[0] + 0.25f, sliderLight[sliderIndex], color - 2, 1));
+                    eventTempo.Add(new BasicEventData(time[0] + 0.375f, sliderLight[sliderIndex], color - 1, 1));
                     eventTempo.Add(new BasicEventData(time[0] + 0.5f, sliderLight[sliderIndex], 0, 1));
 
                     sliderIndex--;
 
                     // Spin goes brrr
-                    if (AllowSpinZoom)
+                    eventTempo.Add(new BasicEventData(time[0], EventType.SPIN, 0, 1));
+                    for (int i = 0; i < 8; i++)
                     {
-                        eventTempo.Add(new BasicEventData(time[0], EventType.SPIN, 0, 1));
-                        for (int i = 0; i < 8; i++)
-                        {
-                            eventTempo.Add(new BasicEventData(time[0] + 0.5f - (0.5f / 8f * i), EventType.SPIN, 0, 1));
-                        }
+                        eventTempo.Add(new BasicEventData(time[0] + 0.5f - (0.5f / 8f * i), EventType.SPIN, 0, 1));
                     }
 
                     wasSlider = true;
@@ -422,7 +379,7 @@ namespace Lolighter.Algorithm
                 // Not a double
                 else if (time[0] != nextDouble)
                 {
-                    if (time[0] - time[1] >= lastSpeed + 0.02 || time[0] - time[1] <= lastSpeed - 0.02 || patternCount == 20) // New speed or 20 notes of the same pattern
+                    if (time[1] - time[2] >= lastSpeed + 0.02 || time[1] - time[2] <= lastSpeed - 0.02 || patternCount == 20) // New speed or 20 notes of the same pattern
                     {
                         int old = 0;
                         // New pattern
@@ -446,6 +403,7 @@ namespace Lolighter.Algorithm
                     // Place the next light
                     eventTempo.Add(new BasicEventData(time[0], pattern[patternIndex], color, 1));
 
+                    // Speed based on rhythm
                     if (time[0] - time[1] < 0.25)
                     {
                         currentSpeed = 7;
@@ -463,29 +421,30 @@ namespace Lolighter.Algorithm
                         currentSpeed = 1;
                     }
 
+                    // Add laser rotation if necessary
                     if (pattern[patternIndex] == 2)
                     {
-                        eventTempo.Add(new BasicEventData(time[0], EventType.LEFT_ROT, currentSpeed, 1));
+                        eventTempo.Add(new BasicEventData(time[0] + 0.01f, EventType.LEFT_ROT, currentSpeed, 1));
                     }
                     else if (pattern[patternIndex] == 3)
                     {
-                        eventTempo.Add(new BasicEventData(time[0], EventType.RIGHT_ROT, currentSpeed, 1));
+                        eventTempo.Add(new BasicEventData(time[0] + 0.01f, EventType.RIGHT_ROT, currentSpeed, 1));
                     }
 
                     // Place off event
-                    if (Timing[^1] != note)
+                    if (Notes[^1].beat != note.beat)
                     {
-                        if (Timing[Timing.FindIndex(n => n == note) + 1] == nextDouble)
+                        if (Notes[Notes.FindIndex(n => n == note) + 1].beat == nextDouble)
                         {
-                            if (Timing[Timing.FindIndex(n => n == note) + 1] - time[0] <= 2)
+                            if (Notes[Notes.FindIndex(n => n == note) + 1].beat - time[0] <= 2)
                             {
-                                float value = (Timing[Timing.FindIndex(n => n == note) + 1] - Timing[Timing.FindIndex(n => n == note)]) / 2;
-                                eventTempo.Add(new BasicEventData(Timing[Timing.FindIndex(n => n == note)] + value, pattern[patternIndex], 0, 1));
+                                float value = (Notes[Notes.FindIndex(n => n == note) + 1].beat - Notes[Notes.FindIndex(n => n == note)].beat) / 2;
+                                eventTempo.Add(new BasicEventData(Notes[Notes.FindIndex(n => n == note)].beat + value, pattern[patternIndex], 0, 1));
                             }
                         }
                         else
                         {
-                            eventTempo.Add(new BasicEventData(Timing[Timing.FindIndex(n => n == note) + 1], pattern[patternIndex], 0, 1));
+                            eventTempo.Add(new BasicEventData(Notes[Notes.FindIndex(n => n == note) + 1].beat, pattern[patternIndex], 0, 1));
                         }
                     }
 
@@ -502,42 +461,6 @@ namespace Lolighter.Algorithm
                     patternCount++;
                     lastSpeed = time[0] - time[1];
                 }
-                else if (time[0] - time[1] < 0.25) //Lower than fourth
-                {
-                    if (time[0] != last && time[0] != time[1] && note != 8 && note != lastCut && AllowSpinZoom && !NerfStrobes) //Spin
-                    {
-                        last = time[0];
-                        eventTempo.Add(new BasicEventData(time[0], EventType.SPIN, 0, 1));
-                        for (int i = 0; i < 8; i++)
-                        {
-                            eventTempo.Add(new BasicEventData(time[0] - ((time[0] - time[1]) / 8 * i), EventType.SPIN, 0, 1));
-                        }
-                    }
-
-                    if (time[0] == time[1])
-                    {
-                        CreateGenericLight(currentSpeed);
-                    }
-                    else
-                    {
-                        CreateGenericLight(currentSpeed = 7);
-                    }
-                }
-                else if (time[0] - time[1] >= 0.25 && time[0] - time[1] < 0.5) //Quarter to half
-                {
-                    CreateGenericLight(currentSpeed = 5);
-                }
-                else if (time[0] - time[1] >= 0.5 && time[0] - time[1] < 1) //Half to 1
-                {
-
-                    CreateGenericLight(currentSpeed = 3);
-                }
-                else if (time[0] - time[1] >= 1) //1 and above
-                {
-                    CreateGenericLight(currentSpeed = 1);
-                }
-
-                lastCut = note; //For the spin check.
 
                 for (int i = 3; i > 0; i--) //Keep the timing of up to three notes before.
                 {
@@ -545,78 +468,63 @@ namespace Lolighter.Algorithm
                 }
             }
 
-            ResetTimer();
-            sliderIndex = 0;
+            eventTempo = eventTempo.OrderBy(o => o.beat).ToList();
 
-            // Deal with chain
-            foreach (BurstSliderData chain in Slider)
-            {
-                // Take a light between neon, side or backlight and strobes it via On/Flash
-                if (sliderIndex == -1)
-                {
-                    int old = sliderLight[sliderIndex + 1];
-
-                    time[0] = chain.beat;
-
-                    TimerDuration();
-
-                    do
-                    {
-                        sliderLight.Shuffle();
-                    } while (sliderLight[2] == old);
-
-                    sliderIndex = 2;
-                }
-
-                // Place light
-                if (AllowFade)
-                {
-                    eventTempo.Add(new BasicEventData(chain.beat, sliderLight[sliderIndex], color - 2, 1));
-                    eventTempo.Add(new BasicEventData(chain.beat + 0.125f, sliderLight[sliderIndex], color - 1, 1));
-                    eventTempo.Add(new BasicEventData(chain.beat + 0.25f, sliderLight[sliderIndex], color - 2, 1));
-                    eventTempo.Add(new BasicEventData(chain.beat + 0.375f, sliderLight[sliderIndex], color - 1, 1));
-                }
-                else
-                {
-                    eventTempo.Add(new BasicEventData(chain.beat, sliderLight[sliderIndex], color, 1));
-                    eventTempo.Add(new BasicEventData(chain.beat + 0.125f, sliderLight[sliderIndex], color + 1, 1));
-                    eventTempo.Add(new BasicEventData(chain.beat + 0.25f, sliderLight[sliderIndex], color, 1));
-                    eventTempo.Add(new BasicEventData(chain.beat + 0.375f, sliderLight[sliderIndex], color + 1, 1));
-                }
-                eventTempo.Add(new BasicEventData(chain.beat + 0.5f, sliderLight[sliderIndex], 0, 1));
-
-                sliderIndex--;
-
-                // Spin goes brrr
-                if (AllowSpinZoom)
-                {
-                    eventTempo.Add(new BasicEventData(chain.beat, EventType.SPIN, 0, 1));
-                    for (int i = 0; i < 8; i++)
-                    {
-                        eventTempo.Add(new BasicEventData(chain.beat + 0.5f - (0.5f / 8f * i), EventType.SPIN, 0, 1));
-                    }
-                }
-            }
+            // Remove fused or move off event between
+            eventTempo = RemoveFused(eventTempo);
 
             // Sort lights
             eventTempo = eventTempo.OrderBy(o => o.beat).ToList();
+            boostEvent = boostEvent.OrderBy(o => o.beat).ToList();
 
-            // Remove fused
-            for (int i = 1; i < eventTempo.Count - 1; i++)
+            return (boostEvent, eventTempo);
+        }
+
+        static public List<BasicEventData> RemoveFused(List<BasicEventData> events)
+        {
+            float? closest = 0f;
+
+            // Get all fused events of a specific type
+            for (int i = 0; i < events.Count; i++)
             {
-                // Very close to eachother
-                if (eventTempo.Any(e => e.beat == eventTempo[i].beat && e.eventType == eventTempo[i].eventType && e != eventTempo[i]))
+                BasicEventData e = events[i];
+
+                BasicEventData? basicEventData = events.Find(o => o.eventType == e.eventType && (o.beat - e.beat >= -0.02 && o.beat - e.beat <= 0.02) && o != e);
+                if (basicEventData != null)
                 {
-                    // Off event
-                    if (eventTempo[i].value == 0 || eventTempo[i].value == 4)
+                    BasicEventData? basicEventData2 = events.Find(o => o.eventType == basicEventData.eventType && (o.beat - basicEventData.beat >= -0.02 && o.beat - basicEventData.beat <= 0.02) && o != basicEventData);
+
+                    if(basicEventData2 != null)
                     {
-                        eventTempo.Remove(eventTempo[i]);
-                        i--;
+                        BasicEventData? temp = events.FindLast(o => o.beat < e.beat && e.beat > closest && o.value != 0);
+
+                        if (temp != null)
+                        {
+                            closest = temp.beat;
+
+                            if (basicEventData2.value == EventLightValue.OFF)
+                            {
+                                // Move off event between fused note and last note
+                                events[(events.FindIndex(o => o.beat == basicEventData2.beat && o.value == basicEventData2.value && o.eventType == basicEventData2.eventType))].beat = (float)(basicEventData2.beat - ((basicEventData2.beat - closest) / 2));
+                            }
+                            else
+                            {
+                                // Move off event between fused note and last note
+                                if (basicEventData.value == EventLightValue.OFF || basicEventData.value == EventLightValue.BLUE_TRANSITION || basicEventData.value == EventLightValue.RED_TRANSITION)
+                                {
+                                    events[(events.FindIndex(o => o.beat == basicEventData.beat && o.value == basicEventData.value && o.eventType == basicEventData.eventType))].beat = (float)(basicEventData.beat - ((basicEventData.beat - closest) / 2));
+                                }
+                                else // Delete event
+                                {
+                                    events.RemoveAt(events.FindIndex(o => o.beat == basicEventData.beat && o.value == basicEventData.value && o.eventType == basicEventData.eventType));
+                                }
+                            }
+                        }
                     }
                 }
             }
 
-            return (boostEvent, eventTempo);
+            return events;
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Lolighter.Info
 
                     // Here's a reference for the code below: 
                     //   https://github.com/SteveLillis/.NET-Ogg-Vorbis-Encoder/blob/master/OggVorbisEncoder.Example/Encoder.cs
-                    var info = VorbisInfo.InitVariableBitRate(2, wav.WaveFormat.SampleRate, 0.1f);
+                    var info = VorbisInfo.InitVariableBitRate(2, wav.WaveFormat.SampleRate, 0.5f);
 
                     // set up our packet->stream encoder
                     var serial = new Random().Next();

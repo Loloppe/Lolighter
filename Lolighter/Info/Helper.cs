@@ -7,6 +7,103 @@ namespace Lolighter.Info
 {
     internal static class Helper
     {
+        /// <summary>
+        /// Method to find Arc between two notes based on their cut direction
+        /// </summary>
+        /// <param name="notes">List of ColorNote</param>
+        /// <returns>List of SliderData</returns>
+        static public List<SliderData> FindArc(List<ColorNote> notes)
+        {
+            List<SliderData> sliderData = new();
+
+            for (int i = 0; i < notes.Count - 1; i++)
+            {
+                if (notes[i + 1].direction == CutDirection.DOWN_LEFT || notes[i + 1].direction == CutDirection.UP_LEFT || notes[i + 1].direction == CutDirection.LEFT)
+                {
+                    
+                    sliderData.Add(new(notes[i], notes[i + 1], 0.8f, 0.8f, SliderMidAnchorMode.CLOCKWISE));
+                }
+                else if (notes[i + 1].direction == CutDirection.DOWN_RIGHT || notes[i + 1].direction == CutDirection.UP_RIGHT || notes[i + 1].direction == CutDirection.RIGHT)
+                {
+                    sliderData.Add(new(notes[i], notes[i + 1], 0.8f, 0.8f, SliderMidAnchorMode.COUNTER_CLOCKWISE));
+                }
+                else
+                {
+                    sliderData.Add(new(notes[i], notes[i + 1], 0.8f, 0.8f, SliderMidAnchorMode.STRAIGHT));
+                }
+            }
+
+            return sliderData;
+        }
+
+        /// <summary>
+        /// Method to find specific pattern and remove the notes of the pattern from the main list of note
+        /// </summary>
+        /// <param name="notes">List of ColorNote</param>
+        /// <returns>List of list of ColorNote (Pattern) and modified List of ColorNote</returns>
+        static public (List<List<ColorNote>>, List<ColorNote>) FindPattern(List<ColorNote> notes)
+        {
+            // List of list to keep thing like sliders/stack/window/tower etc
+            List<List<ColorNote>> patterns = new();
+
+            // Stock pattern notes
+            List<ColorNote> pattern = new();
+
+            // To know if a pattern was found
+            bool found = false;
+
+            // Find all notes sliders/stack/window/tower
+            for (int i = 0; i < notes.Count; i++)
+            {
+                if (i == notes.Count - 1)
+                {
+                    if (found)
+                    {
+                        pattern.Add(new(notes[i]));
+                        notes.RemoveAt(i);
+                        patterns.Add(new(pattern));
+                        found = false;
+                    }
+                    break;
+                }
+
+                ColorNote now = notes[i];
+                ColorNote next = notes[i + 1];
+
+                if (next.beat - now.beat >= 0 && next.beat - now.beat < 0.1)
+                {
+                    if (!found)
+                    {
+                        pattern = new();
+                        found = true;
+                    }
+                    pattern.Add(new(notes[i]));
+                    notes.RemoveAt(i);
+                    i--;
+                }
+                else
+                {
+                    if (found)
+                    {
+                        pattern.Add(new(notes[i]));
+                        notes.RemoveAt(i);
+                        i--;
+                        patterns.Add(new(pattern));
+                    }
+
+                    found = false;
+                }
+            }
+
+            return (patterns, notes);
+        }
+
+        /// <summary>
+        /// Method to check if last and next cut direction match
+        /// </summary>
+        /// <param name="dir">Next cut direction</param>
+        /// <param name="cut">Last cut direction</param>
+        /// <returns>Boolean</returns>
         static public bool FlowCheck(int dir, int cut)
         {
             List<int> UpCut = new() { 0, 4, 5 };
@@ -45,6 +142,12 @@ namespace Lolighter.Info
             return found;
         }
 
+        /// <summary>
+        /// Method to check if last and multiple next cut direction match
+        /// </summary>
+        /// <param name="note">Possible next cut direction</param>
+        /// <param name="cut">Last cut direction</param>
+        /// <returns>Boolean and a Queue of ColorNote</returns>
         static public (bool, Queue<ColorNote>) FlowCheck(List<ColorNote> note, int cut)
         {
             List<int> UpCut = new() { 0, 4, 5 };
@@ -105,6 +208,15 @@ namespace Lolighter.Info
             return (found, temp);
         }
 
+
+        /// <summary>
+        /// Method with two layer of depth to find out if the parity of the next direction match the last two
+        /// </summary>
+        /// <param name="type">Color of the note</param>
+        /// <param name="now">Next cut direction</param>
+        /// <param name="before">Last cut direction</param>
+        /// <param name="beforeBefore">Before last cut direction</param>
+        /// <returns></returns>
         static public bool ParityCheck(int type, int now, int before, int beforeBefore)
         {
             if (now == 8) // Any
@@ -1078,9 +1190,15 @@ namespace Lolighter.Info
             return false;
         }
 
+        /// <summary>
+        /// Method that return a specific double notes fitting the current context given
+        /// </summary>
+        /// <param name="left">Last red note</param>
+        /// <param name="right">Last blue note</param>
+        /// <returns>Two new ColorNote</returns>
         static public List<ColorNote> FindDouble(int left, int right)
         {
-            List<ColorNote> found = new List<ColorNote>();
+            List<ColorNote> found = new();
             ColorNote n;
 
             switch (left)
@@ -1621,6 +1739,13 @@ namespace Lolighter.Info
             return found;
         }
 
+        /// <summary>
+        /// Method to randomly generate a number between the minimum and maximum (excluded)
+        /// If Maximum is Minimum, return Minimum
+        /// </summary>
+        /// <param name="Low">Minimum</param>
+        /// <param name="High">Maximum - 1</param>
+        /// <returns></returns>
         public static int RandNumber(int Low, int High)
         {
             Random rndNum = new Random(int.Parse(Guid.NewGuid().ToString().Substring(0, 8), System.Globalization.NumberStyles.HexNumber));
@@ -1638,9 +1763,14 @@ namespace Lolighter.Info
             public static List<int> AllEventType = new() { 0, 1, 2, 3, 4, 8, 9, 12, 13 };
         }
 
-        internal static int Swap(int temp) //Fade -> On, On -> Fade
+        /// <summary>
+        /// Method to swap between Fade and On for EventLightValue
+        /// </summary>
+        /// <param name="value">Current EventLightValue</param>
+        /// <returns>Swapped EventLightValue</returns>
+        internal static int Swap(int value)
         {
-            switch (temp)
+            switch (value)
             {
                 case EventLightValue.BLUE_FADE: return EventLightValue.BLUE_ON;
                 case EventLightValue.RED_FADE: return EventLightValue.RED_ON;
@@ -1650,14 +1780,24 @@ namespace Lolighter.Info
             }
         }
 
-        internal static int Inverse(int temp) //Red -> Blue, Blue -> Red
+        /// <summary>
+        /// Method to inverse the current EventLightValue between Red and Blue
+        /// </summary>
+        /// <param name="value">Current EventLightValue</param>
+        /// <returns>Inversed EventLightValue</returns>
+        internal static int Inverse(int value)
         {
-            if (temp > EventLightValue.BLUE_FADE)
-                return temp - 4; //Turn to blue
+            if (value > EventLightValue.BLUE_FADE)
+                return value - 4; //Turn to blue
             else
-                return temp + 4; //Turn to red
+                return value + 4; //Turn to red
         }
 
+        /// <summary>
+        /// Method to randomise the element of a List
+        /// </summary>
+        /// <typeparam name="T">Object</typeparam>
+        /// <param name="list">List</param>
         internal static void Shuffle<T>(this IList<T> list)
         {
             RandomNumberGenerator rng = RandomNumberGenerator.Create();
@@ -1676,6 +1816,13 @@ namespace Lolighter.Info
             }
         }
 
+        /// <summary>
+        /// Method to find the possible Head of a chain
+        /// </summary>
+        /// <param name="note">Current note</param>
+        /// <param name="next">Next note</param>
+        /// <param name="direction">Cut direction</param>
+        /// <returns>True = Current note win over the next one as head</returns>
         internal static bool PossibleHead(ColorNote note, ColorNote next, int direction)
         {
             if (note.direction == CutDirection.ANY && next.direction == CutDirection.ANY && direction != 8)

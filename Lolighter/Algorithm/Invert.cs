@@ -8,16 +8,19 @@ namespace Lolighter.Algorithm
     {
         static public List<ColorNote> MakeInvert(List<ColorNote> noteTemp, double Limiter, bool IsLimited)
         {
+            // Current note
             ColorNote n;
+
+            // Found something that we don't want to invert
             bool found;
 
-            for (int i = noteTemp.Count - 1; i > -1; i--) //For each note in reverse-order
+            for (int i = noteTemp.Count - 1; i > -1; i--) // Reverse-order
             {
                 n = noteTemp[i];
 
                 found = false;
 
-                foreach (ColorNote temp in noteTemp) //For each note
+                foreach (ColorNote temp in noteTemp)
                 {
                     if (n.beat == temp.beat && n.color == temp.color && n.direction == temp.direction && !IsLimited)
                     {

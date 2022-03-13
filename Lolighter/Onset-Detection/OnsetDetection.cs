@@ -157,11 +157,11 @@ namespace Lolighter.Onset_Detection
         }
 
         // Finds the peaks in the flux above the threshold average
-        float[] GetPeaks(List<float> data, float[] dataAverage, int sampleCount, float indistinguishableRange = 0.01f) // 10ms
+        float[] GetPeaks(List<float> data, float[] dataAverage, int sampleCount, float indistinguishableRange = 0.01f) 
         {
             // Number of set of samples to ignore after an onset
-            int immunityPeriod = (int)((float)sampleCount
-                / (float)PCM.WaveFormat.SampleRate
+            int immunityPeriod = (int)((double)sampleCount
+                / (double)PCM.WaveFormat.SampleRate
                 / indistinguishableRange);
 
             // Results
@@ -215,7 +215,7 @@ namespace Lolighter.Onset_Detection
             List<float> thresholdAverage = new List<float>();
 
             // How many spectral fluxes to look at, at a time (approximation is fine)
-            float sourceTimeSpan = (float)(sampleWindow) / (float)(PCM.WaveFormat.SampleRate);
+            double sourceTimeSpan = (double)(sampleWindow) / (double)(PCM.WaveFormat.SampleRate);
             int windowSize = (int)(thresholdTimeSpan / sourceTimeSpan / 2);
 
             for (int i = 0; i < data.Count; i++)
@@ -246,7 +246,7 @@ namespace Lolighter.Onset_Detection
         public double TimePerSample()
         {
             // Length of time per sample
-            return (double)SampleSize / (double)PCM.WaveFormat.SampleRate; // 44100 or 48000?
+            return (double)SampleSize / (double)PCM.WaveFormat.SampleRate; // 1024 and 44100 or 48000. This return 0.0232.. seconds for example.
         }
 
         #endregion

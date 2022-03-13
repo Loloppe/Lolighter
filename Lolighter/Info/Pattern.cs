@@ -1,5 +1,4 @@
-﻿using Lolighter.Algorithm;
-using Lolighter.Data.Structure;
+﻿using Lolighter.Data.Structure;
 using System.Collections.Generic;
 using static Lolighter.Info.Helper;
 
