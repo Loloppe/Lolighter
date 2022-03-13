@@ -194,6 +194,14 @@ namespace Lolighter.Data
 
         public DifficultyData(OldDifficultyData oldDiffData)
         {
+            if(oldDiffData._customData._BPMChanges == null)
+            {
+                oldDiffData._customData._BPMChanges = new();
+            }
+            if (oldDiffData._customData._bookmarks == null)
+            {
+                oldDiffData._customData._bookmarks = new();
+            }
             colorNotes = ConvertOldNoteToNew(oldDiffData._notes);
             bombNotes = ConvertOldBombToNew(oldDiffData._notes);
             basicBeatmapEvents = ConvertOldEventToNew(oldDiffData._events);
