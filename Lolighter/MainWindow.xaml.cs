@@ -378,6 +378,14 @@ namespace Lolighter
         /// <param name="e"></param>
         private void Save_Click(object sender, RoutedEventArgs e)
         {
+            bool newVersion = true;
+
+            MessageBoxResult messageBoxResult = MessageBox.Show("Save the map for Beat Saber version above 1.20.0 (v3)?", "Version", MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.No)
+            {
+                newVersion = false;
+            }
+
             try
             {
                 var systemPath = Environment.
@@ -388,19 +396,41 @@ namespace Lolighter
 
                 Directory.CreateDirectory(complete);
 
-                for (int i = 0; i < DiffListBox.Items.Count; i++)
+                if(newVersion)
                 {
-                    #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-                    string fileName = DiffListBox.Items[i].ToString();
-                    #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+                    for (int i = 0; i < DiffListBox.Items.Count; i++)
+                    {
+                        #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+                        string fileName = DiffListBox.Items[i].ToString();
+                        #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
-                    using StreamWriter wr = new(complete + "\\" + fileName);
-                    wr.WriteLine(JsonSerializer.Serialize<DifficultyData>(difficultyData[i]));
+                        using StreamWriter wr = new(complete + "\\" + fileName);
+                        wr.WriteLine(JsonSerializer.Serialize<DifficultyData>(difficultyData[i]));
+                    }
+
+                    using (StreamWriter wr = new(complete + "\\" + "Info.dat"))
+                    {
+                        wr.WriteLine(JsonSerializer.Serialize<InfoData>(infoData));
+                    }
                 }
-
-                using (StreamWriter wr = new(complete + "\\" + "Info.dat"))
+                else
                 {
-                    wr.WriteLine(JsonSerializer.Serialize<InfoData>(infoData));
+                    for (int i = 0; i < DiffListBox.Items.Count; i++)
+                    {
+                        #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+                        string fileName = DiffListBox.Items[i].ToString();
+                        #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+
+                        difficultyData[i].version = "2.0.0";
+                        using StreamWriter wr = new(complete + "\\" + fileName);
+                        wr.WriteLine(JsonSerializer.Serialize<OldDifficultyData>(new(difficultyData[i])));
+                    }
+
+                    using (StreamWriter wr = new(complete + "\\" + "Info.dat"))
+                    {
+                        infoData._version = "2.0.0";
+                        wr.WriteLine(JsonSerializer.Serialize<InfoData>(infoData));
+                    }
                 }
 
                 MessageBox.Show("Done");
