@@ -1,5 +1,7 @@
 ﻿using Lolighter.Data.Structure;
+using Lolighter.Info;
 using System.Collections.Generic;
+using static Lolighter.Info.Enumerator;
 using static Lolighter.Info.Helper;
 
 namespace Lolighter.Algorithm
@@ -46,7 +48,7 @@ namespace Lolighter.Algorithm
             // Create chain for the remaining notes
             foreach (ColorNote now in temp)
             {
-                size = RandNumber(4, 9);
+                size = Utils.RandNumber(4, 9);
 
                 switch (now.layer) //Process the note into a sliders depending on layer, lane and cut direction manually. This is pretty Pepega.
                 {

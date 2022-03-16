@@ -479,7 +479,29 @@ namespace Lolighter
 
         private void AutomapperButton_Click(object sender, RoutedEventArgs e)
         {
-            (difficultyData[DiffListBox.SelectedIndex].colorNotes, difficultyData[DiffListBox.SelectedIndex].burstSliders) = PatternCreator.Create(difficultyData[DiffListBox.SelectedIndex].colorNotes, "RandomStream", false, false, true, false);
+            float bpm;
+            bool limiter = true;
+
+            bpm = infoData._beatsPerMinute;
+            try
+            {
+                bpm = float.Parse(Interaction.InputBox("Enter song BPM (if it's wrong)", "BPM", bpm.ToString()));
+            }
+            catch (Exception)
+            {
+                bpm = infoData._beatsPerMinute;
+            }
+
+            MessageBoxResult messageBoxResult = MessageBox.Show("Allow inversed backhands flow? Default: No", "Limiter", MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.Yes)
+            {
+                limiter = false;
+            }
+
+            List<float> timings = new();
+            difficultyData[DiffListBox.SelectedIndex].colorNotes.ForEach(o => timings.Add(o.beat));
+
+            (difficultyData[DiffListBox.SelectedIndex].colorNotes, difficultyData[DiffListBox.SelectedIndex].burstSliders) = NoteGenerator.AutoMapper(timings, bpm, limiter);
             difficultyData[DiffListBox.SelectedIndex].obstacles = new();
             difficultyData[DiffListBox.SelectedIndex].bombNotes = new();
             FillDataGrid(DiffListBox.SelectedIndex);
@@ -566,6 +588,7 @@ namespace Lolighter
                 List<BurstSliderData> burstSliders;
 
                 float bpm;
+                bool limiter = true;
 
                 List<float> indistinguishableRange = new();
                 indistinguishableRange.Add(0.005f);     // Overmapped (a bit)
@@ -584,12 +607,18 @@ namespace Lolighter
                     bpm = group.Tempo;
                 }
 
+                MessageBoxResult messageBoxResult = MessageBox.Show("Allow inversed backhands flow? Default: No", "Limiter", MessageBoxButton.YesNo);
+                if (messageBoxResult == MessageBoxResult.Yes)
+                {
+                    limiter = false;
+                }
+
                 for (int i = 0; i < indistinguishableRange.Count; i++)
                 {
                     colorNotes = new();
                     burstSliders = new();
 
-                    (colorNotes, burstSliders) = Onset.GetMap(filePath, bpm, indistinguishableRange[i]);
+                    (colorNotes, burstSliders) = Onset.GetMap(filePath, bpm, indistinguishableRange[i], limiter);
 
                     if(colorNotes.Count > 0)
                     {

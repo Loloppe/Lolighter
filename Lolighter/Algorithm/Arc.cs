@@ -1,6 +1,7 @@
 ﻿using Lolighter.Data.Structure;
 using System.Collections.Generic;
 using System.Linq;
+using static Lolighter.Info.Enumerator;
 using static Lolighter.Info.Helper;
 
 namespace Lolighter.Algorithm

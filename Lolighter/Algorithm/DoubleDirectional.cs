@@ -1,7 +1,8 @@
 ﻿using Lolighter.Data.Structure;
+using Lolighter.Info;
 using System.Collections.Generic;
 using System.Linq;
-using static Lolighter.Info.Helper;
+using static Lolighter.Info.Enumerator;
 
 namespace Lolighter.Algorithm
 {
@@ -304,7 +305,7 @@ namespace Lolighter.Algorithm
                     sliders[i].First().line = temp;
                 }
 
-                int size = RandNumber(4, 9);
+                int size = Utils.RandNumber(4, 9);
                 BurstSliderData newSlider = new(sliders[i].First(), sliders[i].Last().beat, sliders[i].Last().line, sliders[i].Last().layer, size, 0.8f);
                 burstSliders.Add(newSlider);
             }

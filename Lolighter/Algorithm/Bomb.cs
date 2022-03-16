@@ -1,8 +1,8 @@
 ﻿using Lolighter.Data.Structure;
-using System;
+using Lolighter.Info;
 using System.Collections.Generic;
 using System.Linq;
-using static Lolighter.Info.Helper;
+using static Lolighter.Info.Enumerator;
 
 namespace Lolighter.Algorithm
 {
@@ -106,7 +106,7 @@ namespace Lolighter.Algorithm
                                 switch (n.direction)
                                 {
                                     case CutDirection.LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.LEFT, Layer.TOP));
                                         }
@@ -116,7 +116,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.LEFT, Layer.TOP));
                                         }
@@ -149,7 +149,7 @@ namespace Lolighter.Algorithm
                                         newBomb.Add(new BombNote(n.beat, Line.LEFT, Layer.MIDDLE));
                                         break;
                                     case CutDirection.LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.MIDDLE_LEFT, Layer.TOP));
                                         }
@@ -159,7 +159,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.MIDDLE_LEFT, Layer.TOP));
                                         }
@@ -169,7 +169,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.UP_LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.LEFT, Layer.BOTTOM));
                                         }
@@ -179,7 +179,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.UP_RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.LEFT, Layer.TOP));
                                         }
@@ -189,7 +189,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.DOWN_LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.LEFT, Layer.TOP));
                                         }
@@ -199,7 +199,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.DOWN_RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.LEFT, Layer.BOTTOM));
                                         }
@@ -220,7 +220,7 @@ namespace Lolighter.Algorithm
                                         newBomb.Add(new BombNote(n.beat, Line.RIGHT, Layer.MIDDLE));
                                         break;
                                     case CutDirection.LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.MIDDLE_RIGHT, Layer.TOP));
                                         }
@@ -230,7 +230,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.MIDDLE_RIGHT, Layer.TOP));
                                         }
@@ -240,7 +240,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.UP_LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.MIDDLE_LEFT, Layer.BOTTOM));
                                         }
@@ -250,7 +250,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.UP_RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.MIDDLE_LEFT, Layer.TOP));
                                         }
@@ -260,7 +260,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.DOWN_LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.MIDDLE_LEFT, Layer.TOP));
                                         }
@@ -270,7 +270,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.DOWN_RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.MIDDLE_LEFT, Layer.BOTTOM));
                                         }
@@ -285,7 +285,7 @@ namespace Lolighter.Algorithm
                                 switch (n.direction)
                                 {
                                     case CutDirection.LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.RIGHT, Layer.TOP));
                                         }
@@ -295,7 +295,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newBomb.Add(new BombNote(n.beat, Line.RIGHT, Layer.TOP));
                                         }

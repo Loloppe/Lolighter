@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Lolighter.Data.Structure;
-using static Lolighter.Info.Helper;
+using Lolighter.Info;
+using static Lolighter.Info.Enumerator;
 
 namespace Lolighter.Algorithm
 {
@@ -126,7 +127,7 @@ namespace Lolighter.Algorithm
                 {
                     if (now.value == EventLightValue.BLUE_FADE || now.value == EventLightValue.RED_FADE || now.value == EventLightValue.BLUE_ON || now.value == EventLightValue.RED_ON)
                     {
-                        now.value = Swap(now.value);
+                        now.value = Utils.Swap(now.value);
                     }
                 }
             }

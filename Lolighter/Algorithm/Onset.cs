@@ -16,15 +16,15 @@ namespace Lolighter.Algorithm
         // Maximum speed for a note placement (in beat)
         public const double LIMITER = (1d / 8d);
         // Maximum speed for a double note placement (in beat)
-        public const double DOUBLE_LIMITER = (1d / 4d);
+        public const double DOUBLE_LIMITER = (1d / 3d);
 
         static public AudioAnalysis audioAnalysis = new();
 
-        static public (List<ColorNote>, List<BurstSliderData>) GetMap(string audioPath, float bpm, float indistinguishableRange)
+        static public (List<ColorNote>, List<BurstSliderData>) GetMap(string audioPath, float bpm, float indistinguishableRange, bool limiter)
         {
             // New list of notes and chain, will be filled via PatternCreator.cs
-            // notes is filled with fake notes with only beat from onset
-            List<ColorNote> notes = new();
+            List<ColorNote> notes = new List<ColorNote>();
+            List<float> timings = new();
             List<BurstSliderData> chains = new();
 
             try
@@ -58,12 +58,12 @@ namespace Lolighter.Algorithm
                         if (beat - lastBeat >= LIMITER)
                         {
                             // Add a new timing
-                            notes.Add(new((float)(beat), 0, 0, 0, 0, 0));
+                            timings.Add((float)beat);
 
                             if (onset >= DOUBLE_THRESHOLD)
                             {
                                 // Add another timing to create a double note on same beat
-                                notes.Add(new((float)(beat), 0, 0, 0, 0, 0));
+                                timings.Add((float)beat);
                                 wasDouble = true;
                             }
                             else
@@ -80,16 +80,18 @@ namespace Lolighter.Algorithm
                             if (onset > lastOnset) // Higher onset take priority
                             {
                                 // Modify the timing of the last note
-                                notes.Last().beat = (float)beat;
+                                timings.Remove(timings.Last());
+                                timings.Add((float)beat);
+
                                 if(wasDouble)
                                 {
                                     // Modify the timing of the last double note to match the current new timing
-                                    notes[notes.Count - 2].beat = (float)beat;
+                                    timings[timings.Count - 2] = (float)beat;
                                 }
                                 else if(onset >= DOUBLE_THRESHOLD)
                                 {
                                     // Add a new timing to create a double since last timing wasn't a double
-                                    notes.Add(new((float)(beat), 0, 0, 0, 0, 0));
+                                    timings.Add((float)beat);
                                     wasDouble = true;
                                 }
 
@@ -101,17 +103,16 @@ namespace Lolighter.Algorithm
                 }
 
                 // Find double on same beat with note closer than DOUBLE_LIMITER before or after the double and remove a note of the double (to fix burst issue)
-                for(int i = 2; i < notes.Count - 1; i++)
+                for(int i = 2; i < timings.Count - 1; i++)
                 {
-                    if(notes[i - 1].beat == notes[i].beat && (notes[i - 1].beat - notes[i - 2].beat <= DOUBLE_LIMITER || notes[i + 1].beat - notes[i].beat <= DOUBLE_LIMITER))
+                    if(timings[i - 1] == timings[i] && (timings[i - 1] - timings[i - 2] <= DOUBLE_LIMITER || timings[i + 1] - timings[i] <= DOUBLE_LIMITER))
                     {
-                        notes.RemoveAt(i);
+                        timings.RemoveAt(i);
                         i--;
                     }
                 }
-
                 // Method to generate the map pattern
-                (notes, chains) = PatternCreator.Create(notes, "RandomStream", false, false, true, true);
+                (notes, chains) = NoteGenerator.AutoMapper(timings, bpm, limiter);
             }
             catch (Exception)
             {

@@ -1,12 +1,587 @@
 ﻿using Lolighter.Data.Structure;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
+using System.Linq;
+using static Lolighter.Info.Enumerator;
+using static Lolighter.Info.Utils;
 
 namespace Lolighter.Info
 {
     internal static class Helper
     {
+        static public (ColorNote, ColorNote) FixDoublePlacement(ColorNote red, ColorNote blue)
+        {
+            // Both on same layer
+            if(red.layer == blue.layer && red.line != blue.line)
+            {
+                // Change the layer of one of the note
+                if(SwingType.Horizontal.Contains(red.direction))
+                {
+                    if(red.layer == Layer.BOTTOM)
+                    {
+                        if(red.line == Line.LEFT)
+                        {
+                            red.layer++;
+                        }
+                        else if(red.line == Line.MIDDLE_LEFT || red.line == Line.MIDDLE_RIGHT)
+                        {
+                            red.layer = Layer.TOP;
+                        }
+                        else
+                        {
+                            if(SwingType.Up.Contains(blue.direction))
+                            {
+                                blue.layer = Layer.TOP;
+                            }
+                            else
+                            {
+                                 red.layer++;
+                            }
+                        }
+                    }
+                    else if(red.layer == Layer.TOP)
+                    {
+                        if (red.line == Line.LEFT)
+                        {
+                            red.layer--;
+                        }
+                        else if (red.line == Line.MIDDLE_LEFT || red.line == Line.MIDDLE_RIGHT)
+                        {
+                            red.layer = Layer.BOTTOM;
+                        }
+                        else
+                        {
+                            red.layer--;
+                        }
+                    }
+                }
+                else if(SwingType.Horizontal.Contains(blue.direction))
+                {
+                    if (blue.layer == Layer.BOTTOM)
+                    {
+                        if (blue.line == Line.RIGHT)
+                        {
+                            blue.layer++;
+                        }
+                        else if (blue.line == Line.MIDDLE_LEFT || blue.line == Line.MIDDLE_RIGHT)
+                        {
+                            blue.layer = Layer.TOP;
+                        }
+                        else
+                        {
+                            if (SwingType.Up.Contains(red.direction))
+                            {
+                                red.layer = Layer.TOP;
+                            }
+                            else
+                            {
+                                blue.layer++;
+                            }
+                        }
+                    }
+                    else if (blue.layer == Layer.TOP)
+                    {
+                        if (blue.line == Line.RIGHT)
+                        {
+                            blue.layer--;
+                        }
+                        else if (blue.line == Line.MIDDLE_LEFT || blue.line == Line.MIDDLE_RIGHT)
+                        {
+                            blue.layer = Layer.BOTTOM;
+                        }
+                        else if (blue.layer == Layer.TOP)
+                        {
+                            if (blue.line == Line.LEFT)
+                            {
+                                blue.layer--;
+                            }
+                            else if (blue.line == Line.MIDDLE_LEFT || blue.line == Line.MIDDLE_RIGHT)
+                            {
+                                blue.layer = Layer.BOTTOM;
+                            }
+                            else
+                            {
+                                blue.layer--;
+                            }
+                        }
+                    }
+                }
+            }
+            // Both on the same line
+            else if (red.line == blue.line && red.layer != blue.layer)
+            {
+                if(SwingType.Vertical.Contains(red.direction))
+                {
+                    // Change the line of one of the notes
+                    if (red.line > 1)
+                    {
+                        if (red.layer != Layer.MIDDLE)
+                        {
+                            if (red.line != Line.LEFT)
+                            {
+                                red.line--;
+                            }
+                            else
+                            {
+                                red.line++;
+                            }
+                        }
+                        else if (blue.layer == 0)
+                        {
+                            red.layer = 2;
+                            if (red.line != Line.LEFT)
+                            {
+                                red.line--;
+                            }
+                            else
+                            {
+                                red.line++;
+                            }
+                        }
+                        else if (blue.layer == 2)
+                        {
+                            red.layer = 0;
+                            if (red.line != Line.LEFT)
+                            {
+                                red.line--;
+                            }
+                            else
+                            {
+                                red.line++;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (blue.line != Line.RIGHT)
+                        {
+                            blue.line++;
+                        }
+                        else if(red.line != Line.LEFT)
+                        {
+                            red.line--;
+                        }
+                    }
+                }
+                else if(SwingType.Vertical.Contains(blue.direction))
+                {
+                    if (blue.line < 2)
+                    {
+                        if (blue.layer != Layer.MIDDLE)
+                        {
+                            if (blue.line != Line.RIGHT)
+                            {
+                                blue.line++;
+                            }
+                            else
+                            {
+                                blue.line--;
+                            }
+                        }
+                        else if (red.layer == 0)
+                        {
+                            blue.layer = 2;
+                            if (blue.line != Line.RIGHT)
+                            {
+                                blue.line++;
+                            }
+                            else
+                            {
+                                blue.line--;
+                            }
+                        }
+                        else if (red.layer == 2)
+                        {
+                            blue.layer = 0;
+                            if (blue.line != Line.RIGHT)
+                            {
+                                blue.line++;
+                            }
+                            else
+                            {
+                                blue.line--;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (red.line != Line.LEFT)
+                        {
+                            red.line--;
+                        }
+                        else if(blue.line != Line.RIGHT)
+                        {
+                            blue.line++;
+                        }
+                    }
+                }
+            } 
+            
+            // Diagonal
+            if(SwingType.Diagonal.Contains(red.direction) || SwingType.Diagonal.Contains(blue.direction))
+            {
+                if (red.line == blue.line - 1 && red.layer == blue.layer - 1)
+                {
+                    if (blue.layer != 2)
+                    {
+                        blue.layer++;
+                    }
+                    else
+                    {
+                        red.layer--;
+                    }
+                }
+                else if (red.line == blue.line - 1 && red.layer == blue.layer + 1)
+                {
+                    if (blue.layer != 0)
+                    {
+                        blue.layer--;
+                    }
+                    else
+                    {
+                        red.layer++;
+                    }
+                }
+                else if (red.line == blue.line + 1 && red.layer == blue.layer + 1)
+                {
+                    if (blue.layer != 2)
+                    {
+                        (red.line, blue.line) = (blue.line, red.line);
+                        (red.layer, blue.layer) = (blue.layer, red.layer);
+                        blue.layer++;
+                    }
+                    else
+                    {
+                        (red.line, blue.line) = (blue.line, red.line);
+                        (red.layer, blue.layer) = (blue.layer, red.layer);
+                        red.layer--;
+                    }
+                }
+                else if (red.line == blue.line + 1 && red.layer == blue.layer - 1)
+                {
+                    if (blue.layer != 0)
+                    {
+                        (red.line, blue.line) = (blue.line, red.line);
+                        (red.layer, blue.layer) = (blue.layer, red.layer);
+                        blue.layer--;
+                    }
+                    else
+                    {
+                        (red.line, blue.line) = (blue.line, red.line);
+                        (red.layer, blue.layer) = (blue.layer, red.layer);
+                        red.layer++;
+                    }
+                }
+            }
+
+            return (red, blue);
+        }
+
+        /// <summary>
+        /// Verify if the note placement match the situation and return the value
+        /// </summary>
+        /// <param name="lastLine">Last note line</param>
+        /// <param name="lastLayer">Last note layer</param>
+        /// <param name="type">Note color</param>
+        /// <returns>Line, Layer</returns>
+        static public (int, int) PlacementCheck(int direction, int type, ColorNote lastNote, ColorNote lastColor)
+        {
+            // Next possible line and layer
+            int line = -1;
+            int layer = -1;
+            int rand;
+
+            do
+            {
+                if (type == ColorType.RED)
+                {
+                    rand = RandNumber(0, PossibleRedPlacement.placement[direction].Count());
+                    line = PossibleRedPlacement.placement[direction][rand][0];
+                    layer = PossibleRedPlacement.placement[direction][rand][1];
+                }
+                else if(type == ColorType.BLUE)
+                {
+                    rand = RandNumber(0, PossibleBluePlacement.placement[direction].Count());
+                    line = PossibleBluePlacement.placement[direction][rand][0];
+                    layer = PossibleBluePlacement.placement[direction][rand][1];
+                }
+
+                // Fix possible fused notes
+                if (lastNote.line == line && lastNote.layer == layer)
+                {
+                    continue;
+                }
+
+                return (line, layer);
+            } while (true);
+        }
+
+        /// <summary>
+        /// Verify if the next direction selected match the situation (flow free) and return the value
+        /// </summary>
+        /// <param name="last">Last direction</param>
+        /// <param name="swing">Up or down swing (wrist)</param>
+        /// <param name="hand">Current hand</param>
+        /// <param name="speed"></param>
+        /// <returns>Direction</returns>
+        static public int NextDirection(int last, int swing, int hand, float speed, bool limiter)
+        {
+            // Store all the possible next cut direction, we will use some logic to find if the next direction match
+            int[] possibleNext = {0, 0};
+            // Type of flow
+            int flow = 0;
+            // Next direction
+            int next;
+
+            // Get the direction based on speed
+            if(hand == 0)
+            {
+                if (speed < 0.5) // Under half a beat
+                {
+                    possibleNext = PossibleFlow.normalRed[last];
+                    flow = 2;
+                }
+                else if (speed >= 0.5 && speed < 1) // Half to under a beat
+                {
+                    possibleNext = PossibleFlow.techRed[last];
+                    flow = 1;
+                }
+                else // Anything above a beat is pretty slow usually
+                {
+                    possibleNext = PossibleFlow.extremeRed[last];
+                    flow = 0;
+                }
+            }
+            else if (hand == 1)
+            {
+                if (speed < 0.5) // Under half a beat
+                {
+                    possibleNext = PossibleFlow.normalBlue[last];
+                    flow = 2;
+                }
+                else if (speed >= 0.5 && speed < 1) // Half to under a beat
+                {
+                    possibleNext = PossibleFlow.techBlue[last];
+                    flow = 1;
+                }
+                else // Anything above a beat is pretty slow usually
+                {
+                    possibleNext = PossibleFlow.extremeBlue[last];
+                    flow = 0;
+                }
+            }
+
+
+            do
+            {
+                next = Utils.RandNumber(0, 8);
+
+                if(hand == 0)
+                {
+                    if (PossibleFlow.extremeRed[last].Contains(next) && !PossibleFlow.techRed[last].Contains(next)) // Extreme roll again
+                    {
+                        next = Utils.RandNumber(0, 8);
+                    }
+                    if ((PossibleFlow.extremeRed[last].Contains(next) || PossibleFlow.techRed[last].Contains(next)) && !PossibleFlow.normalRed[last].Contains(next)) // Extreme and tech roll again
+                    {
+                        next = Utils.RandNumber(0, 8);
+                    }
+                }
+                else if (hand == 1)
+                {
+                    if (PossibleFlow.extremeBlue[last].Contains(next) && !PossibleFlow.techBlue[last].Contains(next)) // Extreme roll again
+                    {
+                        next = Utils.RandNumber(0, 8);
+                    }
+                    if ((PossibleFlow.extremeBlue[last].Contains(next) || PossibleFlow.techBlue[last].Contains(next)) && !PossibleFlow.normalBlue[last].Contains(next)) // Extreme and tech roll again
+                    {
+                        next = Utils.RandNumber(0, 8);
+                    }
+                }
+
+
+
+
+                // We check if the possible next direction match with the last one before any logic.
+                if (possibleNext.Contains(next))
+                {
+                    // Each hand and type of swing have to be treated differently
+                    if (hand == 0) // Red
+                    {
+                        if (swing == 0) // Up Swing
+                        {
+                            if(limiter && (next == CutDirection.LEFT || next == CutDirection.UP_RIGHT || next == CutDirection.UP)) // Too far
+                            {
+                                continue;
+                            }
+
+                            if(last == CutDirection.LEFT)
+                            {
+                                if(next == CutDirection.DOWN && flow != 0) // Meh
+                                {
+                                    continue; 
+                                }
+                            }
+
+                            if (last == CutDirection.DOWN || last == CutDirection.DOWN_LEFT) // Down, maximum range of the wrist from the left (extreme)
+                            {
+                                if (next == CutDirection.LEFT || next == CutDirection.UP_LEFT) // Impossible
+                                {
+                                    continue;
+                                }
+                            }
+                            else if (last == CutDirection.RIGHT || last == CutDirection.UP_RIGHT) // Right, maximum range of the wrist from the right (extreme)
+                            {
+                                if (next == CutDirection.UP || next == CutDirection.UP_LEFT) // Impossible
+                                {
+                                    continue;
+                                }
+                            }
+                            if (last == CutDirection.UP)
+                            {
+                                if ((next == CutDirection.RIGHT) && flow != 0) // Not extreme
+                                {
+                                    continue;
+                                }
+                                if (next == CutDirection.DOWN_LEFT && flow != 0) // Meh
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                        else if (swing == 1) // Down Swing
+                        {
+                            if (limiter && (next == CutDirection.RIGHT || next == CutDirection.UP_RIGHT || next == CutDirection.DOWN || next == CutDirection.DOWN_LEFT)) // Too far
+                            {
+                                continue;
+                            }
+
+                            if(last == CutDirection.RIGHT) //Meh
+                            {
+                                if(next == CutDirection.UP && flow != 0)
+                                {
+                                    continue;
+                                }
+                            }
+
+                            if (last == CutDirection.UP || last == CutDirection.UP_RIGHT) // Up, maximum range of the wrist from the left (extreme)
+                            {
+                                if (next == CutDirection.RIGHT || next == CutDirection.DOWN_RIGHT) // Impossible
+                                {
+                                    continue;
+                                }
+                            }
+                            if (last == CutDirection.LEFT || last == CutDirection.DOWN_LEFT) // Left, maximum range of the wrist from the right (extreme)
+                            {
+                                if (next == CutDirection.DOWN || next == CutDirection.DOWN_RIGHT) // Impossible
+                                {
+                                    continue;
+                                }
+                            }
+                            if (last == CutDirection.DOWN)
+                            {
+                                if ((next == CutDirection.RIGHT || next == CutDirection.UP_RIGHT) && flow != 0) // Not extreme
+                                {
+                                    continue;
+                                }
+                                if(next == CutDirection.LEFT && flow != 0) // Meh
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    else if (hand == 1) // Blue
+                    {
+                        if (swing == 0) // Up Swing
+                        {
+                            if (limiter && (next == CutDirection.RIGHT || next == CutDirection.UP || next == CutDirection.UP_LEFT)) // Too far
+                            {
+                                continue;
+                            }
+
+                            if (last == CutDirection.RIGHT)
+                            {
+                                if (next == CutDirection.DOWN && flow != 0) // Meh
+                                {
+                                    continue;
+                                }
+                            }
+
+                            if (last == CutDirection.DOWN || last == CutDirection.DOWN_RIGHT) // Down, maximum range of the wrist from the right (extreme)
+                            {
+                                if (next == CutDirection.RIGHT || next == CutDirection.UP_RIGHT) // Impossible
+                                {
+                                    continue;
+                                }
+                            }
+                            if (last == CutDirection.LEFT || last == CutDirection.UP_LEFT) // Left, maximum range of the wrist from the left (extreme)
+                            {
+                                if (next == CutDirection.UP || next == CutDirection.UP_RIGHT) // Impossible
+                                {
+                                    continue;
+                                }
+                            }
+                            if (last == CutDirection.UP)
+                            {
+                                if (next == CutDirection.LEFT && flow != 0) // Not extreme
+                                {
+                                    continue;
+                                }
+                                if(next == CutDirection.DOWN_RIGHT && flow != 0) // Meh
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                        else if (swing == 1) // Down Swing
+                        {
+                            if (limiter && (next == CutDirection.LEFT || next == CutDirection.UP_LEFT || next == CutDirection.DOWN || next == CutDirection.DOWN_RIGHT)) // Too far
+                            {
+                                continue;
+                            }
+
+                            if (last == CutDirection.LEFT) //Meh
+                            {
+                                if (next == CutDirection.UP && flow != 0)
+                                {
+                                    continue;
+                                }
+                            }
+
+                            if (last == CutDirection.UP || last == CutDirection.UP_LEFT) // Up, maximum range of the wrist from the right (extreme)
+                            {
+                                if (next == CutDirection.LEFT || next == CutDirection.DOWN_LEFT) // Impossible
+                                {
+                                    continue;
+                                }
+                            }
+                            if (last == CutDirection.RIGHT || last == CutDirection.DOWN_RIGHT) // Right, maximum range of the wrist from the left (extreme)
+                            {
+                                if (next == CutDirection.DOWN || next == CutDirection.DOWN_LEFT) // Impossible
+                                {
+                                    continue;
+                                }
+                            }
+                            if (last == CutDirection.DOWN)
+                            {
+                                if ((next == CutDirection.LEFT || next == CutDirection.UP_LEFT) && flow != 0) // Not extreme
+                                {
+                                    continue;
+                                }
+                                if (next == CutDirection.RIGHT && flow != 0) // Meh
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
+                    return next;
+                }
+            } while (true);
+        }
+
         /// <summary>
         /// Method to find Arc between two notes based on their cut direction
         /// </summary>
@@ -99,1724 +674,6 @@ namespace Lolighter.Info
         }
 
         /// <summary>
-        /// Method to check if last and next cut direction match
-        /// </summary>
-        /// <param name="dir">Next cut direction</param>
-        /// <param name="cut">Last cut direction</param>
-        /// <returns>Boolean</returns>
-        static public bool FlowCheck(int dir, int cut)
-        {
-            List<int> UpCut = new() { 0, 4, 5 };
-            List<int> DownCut = new() { 1, 6, 7 };
-            List<int> IntoLeft = new() { 3, 5, 7 };
-            List<int> IntoRight = new() { 2, 4, 6 };
-
-            bool found = false;
-            var hand = cut;
-
-            if (DownCut.Contains(hand) && UpCut.Contains(dir))
-            {
-                found = true;
-            }
-            else if (UpCut.Contains(hand) && DownCut.Contains(dir))
-            {
-                found = true;
-            }
-            else if (hand == 2 && IntoLeft.Contains(dir))
-            {
-                found = true;
-            }
-            else if (hand == 3 && IntoRight.Contains(dir))
-            {
-                found = true;
-            }
-            else if (IntoLeft.Contains(hand) && dir == 2)
-            {
-                found = true;
-            }
-            else if (IntoRight.Contains(hand) && dir == 3)
-            {
-                found = true;
-            }
-
-            return found;
-        }
-
-        /// <summary>
-        /// Method to check if last and multiple next cut direction match
-        /// </summary>
-        /// <param name="note">Possible next cut direction</param>
-        /// <param name="cut">Last cut direction</param>
-        /// <returns>Boolean and a Queue of ColorNote</returns>
-        static public (bool, Queue<ColorNote>) FlowCheck(List<ColorNote> note, int cut)
-        {
-            List<int> UpCut = new() { 0, 4, 5 };
-            List<int> DownCut = new() { 1, 6, 7 };
-            List<int> IntoLeft = new() { 3, 5, 7 };
-            List<int> IntoRight = new() { 2, 4, 6 };
-
-            bool found = false;
-            var hand = cut;
-            int count = 0;
-
-            for (var i = 0; i < note.Count; i++)
-            {
-                if (DownCut.Contains(hand) && UpCut.Contains(note[i].direction))
-                {
-                    count = i;
-                    found = true;
-                    break;
-                }
-                else if (UpCut.Contains(hand) && DownCut.Contains(note[i].direction))
-                {
-                    count = i;
-                    found = true;
-                    break;
-                }
-                else if (hand == 2 && IntoLeft.Contains(note[i].direction))
-                {
-                    count = i;
-                    found = true;
-                    break;
-                }
-                else if (hand == 3 && IntoRight.Contains(note[i].direction))
-                {
-                    count = i;
-                    found = true;
-                    break;
-                }
-                else if (IntoLeft.Contains(hand) && note[i].direction == 2)
-                {
-                    count = i;
-                    found = true;
-                    break;
-                }
-                else if (IntoRight.Contains(hand) && note[i].direction == 3)
-                {
-                    count = i;
-                    found = true;
-                    break;
-                }
-            }
-
-            Queue<ColorNote> temp = new(note);
-            for (int i = 0; i < count; i++)
-            {
-                temp.Enqueue(temp.Dequeue());
-            }
-
-            return (found, temp);
-        }
-
-
-        /// <summary>
-        /// Method with two layer of depth to find out if the parity of the next direction match the last two
-        /// </summary>
-        /// <param name="type">Color of the note</param>
-        /// <param name="now">Next cut direction</param>
-        /// <param name="before">Last cut direction</param>
-        /// <param name="beforeBefore">Before last cut direction</param>
-        /// <returns></returns>
-        static public bool ParityCheck(int type, int now, int before, int beforeBefore)
-        {
-            if (now == 8) // Any
-            {
-                return true;
-            }
-
-            // Also have to handle break in parity, hence the non-flow part.
-
-            switch (beforeBefore)
-            {
-                case 0: // Up
-                    switch (before)
-                    {
-                        case 0: // Up
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 1: // Down
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    if (type == 0) // Red
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 5: // Up-Right
-                                    if (type == 1) // Blue
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 2: // Left
-                            switch (now)
-                            {
-                                case 3: // Right
-                                    return true;
-                                case 7: // Down-Right
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 3: // Right
-                            switch (now)
-                            {
-                                case 2: // Left
-                                    return true;
-                                case 6: // Down-Left
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 4: // Up-Left
-                            switch (now)
-                            {
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 5: // Up-Right
-                            switch (now)
-                            {
-                                case 6: // Down-Left
-                                    return true;
-                            }
-                            break;
-                        case 6: // Down-Left
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 7: // Down-Right
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                            }
-                            break;
-                        case 8: // Any
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                    }
-                    break;
-                case 1: // Down
-                    switch (before)
-                    {
-                        case 0: // Up
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 1: // Down
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 2: // Left
-                            switch (now)
-                            {
-                                case 3: // Right
-                                    return true;
-                                case 7: // Down-Right
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 3: // Right
-                            switch (now)
-                            {
-                                case 2: // Left
-                                    return true;
-                                case 6: // Down-Left
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 4: // Up-Left
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 5: // Up-Right
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                            }
-                            break;
-                        case 6: // Down-Left
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 7: // Down-Right
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                            }
-                            break;
-                        case 8: // Any
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                    }
-                    break;
-                case 2: // Left
-                    switch (before)
-                    {
-                        case 0: // Up
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 1: // Down
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 2: // Left
-                            switch (now)
-                            {
-                                case 3: // Right
-                                    return true;
-                                case 7: // Down-Right
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 3: // Right
-                            switch (now)
-                            {
-                                case 2: // Left
-                                    return true;
-                                case 4: // Up-Left
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 6: // Down-Left
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 4: // Up-Left
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 5: // Up-Right
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 6: // Down-Left
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 6: // Down-Left
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 7: // Down-Right
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 2: // Left
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 4: // Up-Left
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 8: // Any
-                            switch (now)
-                            {
-                                case 2: // Left
-                                    return true;
-                            }
-                            break;
-                    }
-                    break;
-                case 3: // Right
-                    switch (before)
-                    {
-                        case 0: // Up
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 1: // Down
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 2: // Left
-                            switch (now)
-                            {
-                                case 3: // Right
-                                    return true;
-                                case 5: // Up-Right
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 7: // Down-Right
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 3: // Right
-                            switch (now)
-                            {
-                                case 2: // Left
-                                    return true;
-                                case 6: // Down-Left
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 4: // Up-Left
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 7: // Down-Right
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 5: // Up-Right
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                            }
-                            break;
-                        case 6: // Down-Left
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 3: // Right
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 5: // Up-Right
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 7: // Down-Right
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                            }
-                            break;
-                        case 8: // Any
-                            switch (now)
-                            {
-                                case 3: // Right
-                                    return true;
-                            }
-                            break;
-                    }
-                    break;
-                case 4: // Up-Left
-                    switch (before)
-                    {
-                        case 0: // Up
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 1: // Down
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 2: // Left
-                            switch (now)
-                            {
-                                case 3: // Right
-                                    return true;
-                                case 7: // Down-Right
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 3: // Right
-                            switch (now)
-                            {
-                                case 2: // Left
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 4: // Up-Left
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 4: // Up-Left
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 5: // Up-Right
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                            }
-                            break;
-                        case 6: // Down-Left
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 7: // Down-Right
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 2: // Left
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 4: // Up-Left
-                                    return true;
-                            }
-                            break;
-                        case 8: // Any
-                            switch (now)
-                            {
-                                case 4: // Up-Left
-                                    return true;
-                            }
-                            break;
-                    }
-                    break;
-                case 5: // Up-Right
-                    switch (before)
-                    {
-                        case 0: // Up
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 1: // Down
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 2: // Left
-                            switch (now)
-                            {
-                                case 3: // Right
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 4: // Up-Left
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 3: // Right
-                            switch (now)
-                            {
-                                case 2: // Left
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 4: // Up-Left
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 4: // Up-Left
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 5: // Up-Right
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                            }
-                            break;
-                        case 6: // Down-Left
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 3: // Right
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 7: // Down-Right
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                            }
-                            break;
-                        case 8: // Any
-                            switch (now)
-                            {
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                    }
-                    break;
-                case 6: // Down-Left
-                    switch (before)
-                    {
-                        case 0: // Up
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 1: // Down
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 2: // Left
-                            switch (now)
-                            {
-                                case 3: // Right
-                                    return true;
-                                case 7: // Down-Right
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 3: // Right
-                            switch (now)
-                            {
-                                case 2: // Left
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 6: // Down-Left
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 4: // Up-Left
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 5: // Up-Right
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 2: // Left
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 6: // Down-Left
-                                    return true;
-                            }
-                            break;
-                        case 6: // Down-Left
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 7: // Down-Right
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                            }
-                            break;
-                        case 8: // Any
-                            switch (now)
-                            {
-                                case 6: // Down-Left
-                                    return true;
-                            }
-                            break;
-                    }
-                    break;
-                case 7: // Down-Right
-                    switch (before)
-                    {
-                        case 0: // Up
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 1: // Down
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 2: // Left
-                            switch (now)
-                            {
-                                case 3: // Right
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 7: // Down-Right
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 3: // Right
-                            switch (now)
-                            {
-                                case 2: // Left
-                                    return true;
-                                case 6: // Down-Left
-                                    if (type == 1)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case 4: // Up-Left
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 3: // right
-                                    if (type == 0)
-                                    {
-                                        return true;
-                                    }
-                                    break;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 5: // Up-Right
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                            }
-                            break;
-                        case 6: // Down-Left
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 7: // Down-Right
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                            }
-                            break;
-                        case 8: // Any
-                            switch (now)
-                            {
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                    }
-                    break;
-                case 8: // Any
-                    switch (before)
-                    {
-                        case 0: // Up
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 1: // Down
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 2: // Left
-                            switch (now)
-                            {
-                                case 3: // Right
-                                    return true;
-                            }
-                            break;
-                        case 3: // Right
-                            switch (now)
-                            {
-                                case 2: // Left
-                                    return true;
-                            }
-                            break;
-                        case 4: // Up-Left
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 7: // Down-Right
-                                    return true;
-                            }
-                            break;
-                        case 5: // Up-Right
-                            switch (now)
-                            {
-                                case 1: // Down
-                                    return true;
-                                case 6: // Down-Left
-                                    return true;
-                            }
-                            break;
-                        case 6: // Down-Left
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 5: // Up-Right
-                                    return true;
-                            }
-                            break;
-                        case 7: // Down-Right
-                            switch (now)
-                            {
-                                case 0: // Up
-                                    return true;
-                                case 4: // Up-Left
-                                    return true;
-                            }
-                            break;
-                    }
-                    break;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Method that return a specific double notes fitting the current context given
-        /// </summary>
-        /// <param name="left">Last red note</param>
-        /// <param name="right">Last blue note</param>
-        /// <returns>Two new ColorNote</returns>
-        static public List<ColorNote> FindDouble(int left, int right)
-        {
-            List<ColorNote> found = new();
-            ColorNote n;
-
-            switch (left)
-            {
-                case 0:
-                    switch (right)
-                    {
-                        case 0:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 1:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 2:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 3);
-                            found.Add(n);
-                            break;
-                        case 3:
-                            n = new ColorNote(0, 2, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 0, 1, 1, 2);
-                            found.Add(n);
-                            break;
-                        case 4:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 5:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 6:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 7:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 8:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 8);
-                            found.Add(n);
-                            break;
-                    }
-                    break;
-                case 1:
-                    switch (right)
-                    {
-                        case 0:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 1:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 2:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 3);
-                            found.Add(n);
-                            break;
-                        case 3:
-                            n = new ColorNote(0, 2, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 0, 1, 1, 2);
-                            found.Add(n);
-                            break;
-                        case 4:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 5:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 6:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 7:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 8:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 8);
-                            found.Add(n);
-                            break;
-                    }
-                    break;
-                case 2:
-                    switch (right)
-                    {
-                        case 0:
-                            n = new ColorNote(0, 1, 0, 0, 7);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 1:
-                            n = new ColorNote(0, 2, 0, 0, 7);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 2:
-                            n = new ColorNote(0, 3, 0, 0, 3);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 3);
-                            found.Add(n);
-                            break;
-                        case 3:
-                            n = new ColorNote(0, 0, 1, 0, 2);
-                            found.Add(n);
-                            n = new ColorNote(0, 0, 0, 1, 2);
-                            found.Add(n);
-                            break;
-                        case 4:
-                            n = new ColorNote(0, 1, 0, 0, 7);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 7);
-                            found.Add(n);
-                            break;
-                        case 5:
-                            n = new ColorNote(0, 1, 0, 0, 7);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 6:
-                            n = new ColorNote(0, 1, 0, 0, 7);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 7:
-                            n = new ColorNote(0, 1, 0, 0, 7);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 8:
-                            n = new ColorNote(0, 1, 0, 0, 7);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 8);
-                            found.Add(n);
-                            break;
-                    }
-                    break;
-                case 3:
-                    switch (right)
-                    {
-                        case 0:
-                            n = new ColorNote(0, 0, 1, 0, 2);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 1:
-                            n = new ColorNote(0, 0, 1, 0, 2);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 2:
-                            n = new ColorNote(0, 0, 1, 0, 2);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 3);
-                            found.Add(n);
-                            break;
-                        case 3:
-                            n = new ColorNote(0, 0, 1, 0, 2);
-                            found.Add(n);
-                            n = new ColorNote(0, 0, 0, 1, 2);
-                            found.Add(n);
-                            break;
-                        case 4:
-                            n = new ColorNote(0, 0, 1, 0, 2);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 5:
-                            n = new ColorNote(0, 0, 1, 0, 2);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 6:
-                            n = new ColorNote(0, 0, 1, 0, 2);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 7:
-                            n = new ColorNote(0, 0, 1, 0, 2);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 8:
-                            n = new ColorNote(0, 0, 1, 0, 2);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 8);
-                            found.Add(n);
-                            break;
-                    }
-                    break;
-                case 4:
-                    switch (right)
-                    {
-                        case 0:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 1:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 2:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 3);
-                            found.Add(n);
-                            break;
-                        case 3:
-                            n = new ColorNote(0, 2, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 0, 1, 1, 2);
-                            found.Add(n);
-                            break;
-                        case 4:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 5:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 6:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 7:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 8:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 8);
-                            found.Add(n);
-                            break;
-                    }
-                    break;
-                case 5:
-                    switch (right)
-                    {
-                        case 0:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 1:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 2:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 3);
-                            found.Add(n);
-                            break;
-                        case 3:
-                            n = new ColorNote(0, 2, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 0, 1, 1, 2);
-                            found.Add(n);
-                            break;
-                        case 4:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 5:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 6:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 7:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 8:
-                            n = new ColorNote(0, 1, 0, 0, 1);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 8);
-                            found.Add(n);
-                            break;
-                    }
-                    break;
-                case 6:
-                    switch (right)
-                    {
-                        case 0:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 1:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 2:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 3);
-                            found.Add(n);
-                            break;
-                        case 3:
-                            n = new ColorNote(0, 2, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 0, 1, 1, 2);
-                            found.Add(n);
-                            break;
-                        case 4:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 5:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 6:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 7:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 8:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 8);
-                            found.Add(n);
-                            break;
-                    }
-                    break;
-                case 7:
-                    switch (right)
-                    {
-                        case 0:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 1:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 2:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 3);
-                            found.Add(n);
-                            break;
-                        case 3:
-                            n = new ColorNote(0, 2, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 0, 1, 1, 2);
-                            found.Add(n);
-                            break;
-                        case 4:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 5:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 6:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 7:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 8:
-                            n = new ColorNote(0, 1, 2, 0, 0);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 8);
-                            found.Add(n);
-                            break;
-                    }
-                    break;
-                case 8:
-                    switch (right)
-                    {
-                        case 0:
-                            n = new ColorNote(0, 1, 0, 0, 8);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 1:
-                            n = new ColorNote(0, 1, 0, 0, 8);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 2:
-                            n = new ColorNote(0, 1, 0, 0, 8);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 3);
-                            found.Add(n);
-                            break;
-                        case 3:
-                            n = new ColorNote(0, 0, 1, 0, 8);
-                            found.Add(n);
-                            n = new ColorNote(0, 2, 0, 1, 6);
-                            found.Add(n);
-                            break;
-                        case 4:
-                            n = new ColorNote(0, 1, 0, 0, 8);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 5:
-                            n = new ColorNote(0, 1, 0, 0, 8);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 1, 1, 1);
-                            found.Add(n);
-                            break;
-                        case 6:
-                            n = new ColorNote(0, 1, 0, 0, 8);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 7:
-                            n = new ColorNote(0, 1, 0, 0, 8);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 2, 1, 0);
-                            found.Add(n);
-                            break;
-                        case 8:
-                            n = new ColorNote(0, 0, 0, 0, 8);
-                            found.Add(n);
-                            n = new ColorNote(0, 3, 0, 1, 8);
-                            found.Add(n);
-                            break;
-                    }
-                    break;
-            }
-
-            return found;
-        }
-
-        /// <summary>
-        /// Method to randomly generate a number between the minimum and maximum (excluded)
-        /// If Maximum is Minimum, return Minimum
-        /// </summary>
-        /// <param name="Low">Minimum</param>
-        /// <param name="High">Maximum - 1</param>
-        /// <returns></returns>
-        public static int RandNumber(int Low, int High)
-        {
-            Random rndNum = new Random(int.Parse(Guid.NewGuid().ToString().Substring(0, 8), System.Globalization.NumberStyles.HexNumber));
-
-            int rnd = rndNum.Next(Low, High);
-
-            return rnd;
-        }
-
-        internal static class EnvironmentEvent
-        {
-            public static List<int> LightEventType = new() { 0, 1, 2, 3, 4 };
-            public static List<int> TrackRingEventType = new() { 8, 9 };
-            public static List<int> LaserRotationEventType = new() { 12, 13 };
-            public static List<int> AllEventType = new() { 0, 1, 2, 3, 4, 8, 9, 12, 13 };
-        }
-
-        /// <summary>
-        /// Method to swap between Fade and On for EventLightValue
-        /// </summary>
-        /// <param name="value">Current EventLightValue</param>
-        /// <returns>Swapped EventLightValue</returns>
-        internal static int Swap(int value)
-        {
-            switch (value)
-            {
-                case EventLightValue.BLUE_FADE: return EventLightValue.BLUE_ON;
-                case EventLightValue.RED_FADE: return EventLightValue.RED_ON;
-                case EventLightValue.BLUE_ON: return EventLightValue.BLUE_FADE;
-                case EventLightValue.RED_ON: return EventLightValue.RED_FADE;
-                default: return 0;
-            }
-        }
-
-        /// <summary>
-        /// Method to inverse the current EventLightValue between Red and Blue
-        /// </summary>
-        /// <param name="value">Current EventLightValue</param>
-        /// <returns>Inversed EventLightValue</returns>
-        internal static int Inverse(int value)
-        {
-            if (value > EventLightValue.BLUE_FADE)
-                return value - 4; //Turn to blue
-            else
-                return value + 4; //Turn to red
-        }
-
-        /// <summary>
-        /// Method to randomise the element of a List
-        /// </summary>
-        /// <typeparam name="T">Object</typeparam>
-        /// <param name="list">List</param>
-        internal static void Shuffle<T>(this IList<T> list)
-        {
-            RandomNumberGenerator rng = RandomNumberGenerator.Create();
-
-            int n = list.Count;
-            while (n > 1)
-            {
-                byte[] box = new byte[1];
-                do rng.GetBytes(box);
-                while (!(box[0] < n * (Byte.MaxValue / n)));
-                int k = (box[0] % n);
-                n--;
-                T value = list[k];
-                list[k] = list[n];
-                list[n] = value;
-            }
-        }
-
-        /// <summary>
         /// Method to find the possible Head of a chain
         /// </summary>
         /// <param name="note">Current note</param>
@@ -1874,144 +731,6 @@ namespace Lolighter.Info
             }
 
             return false;
-        }
-
-        internal static class DistributionParamType
-        {
-            public const int WAVE = 1;
-            public const int STEP = 2;
-        }
-
-        internal static class RotationDirection
-        {
-            public const int Automatic = 0;
-            public const int Clockwise = 1;
-            public const int Counterclockwise = 2;
-        }
-
-        internal static class Axis
-        {
-            public const int X = 0;
-            public const int Y = 1;
-        }
-
-        internal static class EaseType
-        {
-            public const int None = -1;
-            public const int Linear = 0;
-            public const int InQuad = 1;
-            public const int OutQuad = 2;
-            public const int InOutQuad = 3;
-        }
-
-        internal static class TransitionType
-        {
-            public const int Instant = 0;
-            public const int Interpolate = 1;
-            public const int Extend = 2;
-        }
-
-        internal static class IndexFilterType
-        {
-            public const int Division = 1;
-            public const int StepAndOffset = 2;
-        }
-
-        internal static class LaserType
-        {
-            // Further away from the center
-            public const int LEFT_BOTTOM_VERTICAL = 0;
-            public const int RIGHT_BOTTOM_VERTICAL = 1;
-            public const int LEFT_TOP_VERTICAL = 2;
-            public const int RIGHT_TOP_VERTICAL = 3;
-            // Same as those above, but close to the center
-            public const int LEFT_BOTTOM_CENTER_VERTICAL = 4;
-            public const int RIGHT_BOTTOM_CENTER_VERTICAL = 5;
-            public const int LEFT_TOP_CENTER_VERTICAL = 6;
-            public const int RIGHT_TOP_CENTER_VERTICAL = 7;
-            // Two horizontal layer on the left and two on the right
-            public const int LEFT_BOTTOM_HORIZONTAL = 8;
-            public const int RIGHT_BOTTOM_HORIZONTAL = 9;
-            public const int LEFT_TOP_HORIZONTAL = 10;
-            public const int RIGHT_TOP_HORIZONTAL = 11;
-            // At the very back, point directly toward player
-            public const int TOP_CENTER = 12;
-            public const int BOTTOM_CENTER = 13;
-            public const int LEFT_CENTER = 14;
-            public const int RIGHT_CENTER = 15;
-        }
-
-        internal static class Line
-        {
-            public const int LEFT = 0;
-            public const int MIDDLE_LEFT = 1;
-            public const int MIDDLE_RIGHT = 2;
-            public const int RIGHT = 3;
-        }
-
-        internal static class Layer
-        {
-            public const int BOTTOM = 0;
-            public const int MIDDLE = 1;
-            public const int TOP = 2;
-        }
-
-        internal static class CutDirection
-        {
-            public const int UP = 0;
-            public const int DOWN = 1;
-            public const int LEFT = 2;
-            public const int RIGHT = 3;
-            public const int UP_LEFT = 4;
-            public const int UP_RIGHT = 5;
-            public const int DOWN_LEFT = 6;
-            public const int DOWN_RIGHT = 7;
-            public const int ANY = 8;
-        }
-
-        internal static class ColorType
-        {
-            public const int RED = 0;
-            public const int BLUE = 1;
-        }
-
-        internal static class ObstacleType
-        {
-            public const int WALL = 0;
-            public const int CEILING = 1;
-        }
-
-        internal static class EventType
-        {
-            public const int BACK = 0;
-            public const int RING = 1;
-            public const int LEFT = 2;
-            public const int RIGHT = 3;
-            public const int SIDE = 4;
-            public const int SPIN = 8;
-            public const int ZOOM = 9;
-            public const int LEFT_ROT = 12;
-            public const int RIGHT_ROT = 13;
-        }
-
-        internal static class EventLightValue
-        {
-            public const int OFF = 0;
-            public const int BLUE_ON = 1;
-            public const int BLUE_FLASH = 2;
-            public const int BLUE_FADE = 3;
-            public const int BLUE_TRANSITION = 4;
-            public const int RED_ON = 5;
-            public const int RED_FLASH = 6;
-            public const int RED_FADE = 7;
-            public const int RED_TRANSITION = 8;
-        }
-
-        internal static class SliderMidAnchorMode
-        {
-            public const int STRAIGHT = 0;
-            public const int CLOCKWISE = 1;
-            public const int COUNTER_CLOCKWISE = 2;
         }
     }
 }

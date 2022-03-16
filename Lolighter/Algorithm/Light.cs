@@ -1,7 +1,8 @@
 ﻿using Lolighter.Data.Structure;
+using Lolighter.Info;
 using System.Collections.Generic;
 using System.Linq;
-using static Lolighter.Info.Helper;
+using static Lolighter.Info.Enumerator;
 
 namespace Lolighter.Algorithm
 {
@@ -90,7 +91,7 @@ namespace Lolighter.Algorithm
                     int swapTime = (int)((time[0] - time[1]) / ColorSwap) + 1; //We get the number of "beat" since the last time it entered here this way.
                     for (int i = 0; i < swapTime; i++) //For each time that it need to swap. (Dumb fix for a dumb method)
                     {
-                        color = Inverse(color); //Swap color
+                        color = Utils.Inverse(color); //Swap color
                         offset += ColorSwap; //Offset incremented
                     }
                 }
@@ -250,7 +251,7 @@ namespace Lolighter.Algorithm
                     {
                         if (x.beat - lastTimeTop <= 1)
                         {
-                            x.value = Swap(x.value);
+                            x.value = Utils.Swap(x.value);
                         }
                         lastTimeTop = x.beat;
                     }
@@ -258,7 +259,7 @@ namespace Lolighter.Algorithm
                     {
                         if (x.beat - lastTimeNeon <= 1)
                         {
-                            x.value = Swap(x.value);
+                            x.value = Utils.Swap(x.value);
                         }
                         lastTimeNeon = x.beat;
                     }
@@ -266,7 +267,7 @@ namespace Lolighter.Algorithm
                     {
                         if (x.beat - lastTimeSide <= 1)
                         {
-                            x.value = Swap(x.value);
+                            x.value = Utils.Swap(x.value);
                         }
                         lastTimeSide = x.beat;
                     }

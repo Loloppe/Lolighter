@@ -1,6 +1,6 @@
 ﻿using Lolighter.Data.Structure;
 using System.Collections.Generic;
-using static Lolighter.Info.Helper;
+using static Lolighter.Info.Enumerator;
 
 namespace Lolighter.Info
 {
@@ -22,7 +22,7 @@ namespace Lolighter.Info
             {
                 do
                 {
-                    id = RandNumber(0, 18);
+                    id = Utils.RandNumber(0, 18);
 
                 } while (id == patternID);
 
@@ -35,11 +35,11 @@ namespace Lolighter.Info
             switch (patternID)
             {
                 case 0: //Generic stream
-                    if (RandNumber(0, 2) == 0)
+                    if (Utils.RandNumber(0, 2) == 0)
                     {
                         li = 2;
                     }
-                    else if (RandNumber(0, 2) == 0)
+                    else if (Utils.RandNumber(0, 2) == 0)
                     {
                         li = 3;
                     }
@@ -256,7 +256,7 @@ namespace Lolighter.Info
                     break;
                 case 12: //Triple triple
                     int i;
-                    if (RandNumber(0, 2) == 0)
+                    if (Utils.RandNumber(0, 2) == 0)
                     {
                         i = 0;
                     }
@@ -386,7 +386,7 @@ namespace Lolighter.Info
 
             for (int i = 0; i < 4; i++)
             {
-                int line = RandNumber(0, 4);
+                int line = Utils.RandNumber(0, 4);
 
                 ColorNote note = new ColorNote(0, line, Layer.BOTTOM, color, cut);
                 random.Add(note);
@@ -424,7 +424,7 @@ namespace Lolighter.Info
             {
                 do
                 {
-                    id = RandNumber(0, 18);
+                    id = Utils.RandNumber(0, 18);
                 } while (id == patternID);
 
                 patternID = id;

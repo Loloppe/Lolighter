@@ -29,7 +29,7 @@ namespace Lolighter.Data
             this._songTimeOffset = _songTimeOffset;
             if (this._customData == null)
             {
-                this._customData = new(new());
+                this._customData = new(new("Lolighter", new()));
             }
             this._customData = _customData;
             this._difficultyBeatmapSets = _difficultyBeatmapSets;
@@ -39,7 +39,7 @@ namespace Lolighter.Data
         {
             if(this._customData == null)
             {
-                this._customData = new(new());
+                this._customData = new(new("Lolighter", new()));
             }
         }
 

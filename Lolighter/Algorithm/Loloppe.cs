@@ -1,7 +1,9 @@
 ﻿using Lolighter.Data.Structure;
+using Lolighter.Info;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Lolighter.Info.Enumerator;
 using static Lolighter.Info.Helper;
 
 namespace Lolighter.Algorithm
@@ -107,7 +109,7 @@ namespace Lolighter.Algorithm
                                 switch (n.direction)
                                 {
                                     case CutDirection.LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.LEFT, Layer.TOP, n.direction));
                                         }
@@ -117,7 +119,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.LEFT, Layer.TOP, n.direction));
                                         }
@@ -150,7 +152,7 @@ namespace Lolighter.Algorithm
                                         newNote.Add(new ColorNote(n.beat, n.color, Line.LEFT, Layer.MIDDLE, n.direction));
                                         break;
                                     case CutDirection.LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.MIDDLE_LEFT, Layer.TOP, n.direction));
                                         }
@@ -160,7 +162,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.MIDDLE_LEFT, Layer.TOP, n.direction));
                                         }
@@ -170,7 +172,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.UP_LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.LEFT, Layer.BOTTOM, n.direction));
                                         }
@@ -180,7 +182,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.UP_RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.LEFT, Layer.TOP, n.direction));
                                         }
@@ -190,7 +192,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.DOWN_LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.LEFT, Layer.TOP, n.direction));
                                         }
@@ -200,7 +202,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.DOWN_RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.LEFT, Layer.BOTTOM, n.direction));
                                         }
@@ -221,7 +223,7 @@ namespace Lolighter.Algorithm
                                         newNote.Add(new ColorNote(n.beat, n.color, Line.RIGHT, Layer.MIDDLE, n.direction));
                                         break;
                                     case CutDirection.LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.MIDDLE_RIGHT, Layer.TOP, n.direction));
                                         }
@@ -231,7 +233,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.MIDDLE_RIGHT, Layer.TOP, n.direction));
                                         }
@@ -241,7 +243,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.UP_LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.MIDDLE_LEFT, Layer.BOTTOM, n.direction));
                                         }
@@ -251,7 +253,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.UP_RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.MIDDLE_LEFT, Layer.TOP, n.direction));
                                         }
@@ -261,7 +263,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.DOWN_LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.MIDDLE_LEFT, Layer.TOP, n.direction));
                                         }
@@ -271,7 +273,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.DOWN_RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.MIDDLE_LEFT, Layer.BOTTOM, n.direction));
                                         }
@@ -286,7 +288,7 @@ namespace Lolighter.Algorithm
                                 switch (n.direction)
                                 {
                                     case CutDirection.LEFT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.RIGHT, Layer.TOP, n.direction));
                                         }
@@ -296,7 +298,7 @@ namespace Lolighter.Algorithm
                                         }
                                         break;
                                     case CutDirection.RIGHT:
-                                        if (RandNumber(0, 2) == 0)
+                                        if (Utils.RandNumber(0, 2) == 0)
                                         {
                                             newNote.Add(new ColorNote(n.beat, n.color, Line.RIGHT, Layer.TOP, n.direction));
                                         }

@@ -9,7 +9,7 @@ namespace Lolighter.Data.Structure
         {
             if(_editors == null)
             {
-                _editors = new Editors();
+                _editors = new Editors("Lolighter", new());
             }
             this._editors = _editors;
         }
@@ -22,14 +22,34 @@ namespace Lolighter.Data.Structure
         {
 
             [JsonConstructor]
-            public Editors(string _lastEditedBy = "Lolighter 3.0.0")
+            public Editors(string _lastEditedBy, Lolighter lolighter)
             {
+                _lastEditedBy = "Lolighter";
                 this._lastEditedBy = _lastEditedBy;
+
+                lolighter = new Lolighter();
+                this.lolighter = lolighter;
             }
 
             [JsonInclude]
             [JsonPropertyName("_lastEditedBy")]
-            public string _lastEditedBy { get; set; } = "Lolighter 3.0.0";
+            public string _lastEditedBy { get; set; } = "Lolighter";
+            [JsonInclude]
+            [JsonPropertyName("Lolighter")]
+            public Lolighter lolighter { get; set; } = new();
+        }
+
+        internal class Lolighter
+        {
+            [JsonConstructor]
+            public Lolighter(string version = "1.0.5")
+            {
+                this.version = version;
+            }
+
+            [JsonInclude]
+            [JsonPropertyName("version")]
+            public string version { get; set; } = "1.0.5";
         }
     }
 }
