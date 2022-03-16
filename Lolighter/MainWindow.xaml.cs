@@ -632,12 +632,12 @@ namespace Lolighter
 
 
                 List<DifficultyBeatmaps> btList = new();
-                DifficultyBeatmaps difficultyBeatmaps = new("Easy", 5, "EasyStandard.dat", 16, 0, new(0, 0, "Acc", null, null, null, null, null, null, null));
+                DifficultyBeatmaps difficultyBeatmaps = new("Easy", 1, "EasyStandard.dat", 16, 0, new(0, 0, "Acc", null, null, null, null, null, null, null));
                 btList.Add(difficultyBeatmaps);
                 infoData._difficultyBeatmapSets.Add(new("Standard", btList));
-                infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("Normal", 7, "NormalStandard.dat", 18, 0, new(0, 0, "Decent", null, null, null, null, null, null, null)));
-                infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("Hard", 7, "HardStandard.dat", 18, 0, new(0, 0, "Good", null, null, null, null, null, null, null)));
-                infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("Expert", 7, "ExpertStandard.dat", 18, 0, new(0, 0, "Overmapped", null, null, null, null, null, null, null)));
+                infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("Normal", 3, "NormalStandard.dat", 17, 0, new(0, 0, "Decent", null, null, null, null, null, null, null)));
+                infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("Hard", 5, "HardStandard.dat", 18, 0, new(0, 0, "Good", null, null, null, null, null, null, null)));
+                infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("Expert", 7, "ExpertStandard.dat", 19, 0, new(0, 0, "Overmapped", null, null, null, null, null, null, null)));
                 infoData._difficultyBeatmapSets[0]._difficultyBeatmaps.Add(new("ExpertPlus", 9, "ExpertPlusStandard.dat", 20, 0, new(0, 0, "Very Overmapped", null, null, null, null, null, null, null)));
                 infoData._beatsPerMinute = bpm;
 
