@@ -267,7 +267,7 @@ namespace Lolighter.Data.V2
     internal class Obstacles
     {
         [JsonConstructor]
-        public Obstacles(float _time, int _lineIndex, int _type, int _duration, int _width)
+        public Obstacles(float _time, int _lineIndex, int _type, float _duration, int _width)
         {
             this._time = _time;
             this._lineIndex = _lineIndex;
