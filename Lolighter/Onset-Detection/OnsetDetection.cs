@@ -197,9 +197,12 @@ namespace Lolighter.Onset_Detection
                 {
                     for (int j = i + 1; j < i + immunityPeriod; j++)
                     {
-                        if (peaks[j] > 0)
+                        if(j < peaks.Length)
                         {
-                            peaks[j] = 0.0f;
+                            if (peaks[j] > 0)
+                            {
+                                peaks[j] = 0.0f;
+                            }
                         }
                     }
                 }
