@@ -6,6 +6,7 @@
 // Performs analysis on the audio file
 
 using System;
+using NAudio.Vorbis;
 using NAudio.Wave;
 
 namespace Lolighter.Onset_Detection
@@ -25,7 +26,7 @@ namespace Lolighter.Onset_Detection
         /// <summary>
         /// Raw audio data
         /// </summary>
-        public AudioFileReader PCMStream { get; set; }
+        public dynamic PCMStream { get; set; }
 
         // Onset Detection
         OnsetDetection onsetDetection;
@@ -65,8 +66,13 @@ namespace Lolighter.Onset_Detection
             {
                 PCMStream = new AudioFileReader(filePath);
             }
+            // OGG or EGG
+            else if (filePath.EndsWith(".ogg") || filePath.EndsWith(".egg"))
+            {
+                PCMStream = new VorbisWaveReader(filePath);
+            }
 
-            if (PCMStream != null)
+            else if (PCMStream != null)
             {
                 // Throw an error is the audio has more channels than stereo
                 if (PCMStream.WaveFormat.Channels > 2)

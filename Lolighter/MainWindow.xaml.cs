@@ -559,7 +559,7 @@ namespace Lolighter
             if (filePath == "") // No file are selected yet
             {
                 OpenFileDialog openFileDialog = new();
-                openFileDialog.Filter = "*.mp3|*.mp3";
+                openFileDialog.Filter = "*.*gg|*.*gg|*.mp3|*.mp3";
                 openFileDialog.Title = "Open audio";
                 openFileDialog.InitialDirectory = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Beat Saber\\Beat Saber_Data";
                 bool? result = openFileDialog.ShowDialog();
@@ -576,18 +576,33 @@ namespace Lolighter
                             );
                 var complete = Path.Combine(systemPath, "Lolighter");
 
+                if(Directory.Exists(complete))
+                {
+                    Directory.Delete(complete, true);
+                }
                 Directory.CreateDirectory(complete);
 
-                File.Move(filePath, Path.GetDirectoryName(filePath) + "\\song.mp3");
+                if(Path.GetExtension(filePath) == ".mp3")
+                {
+                    File.Move(filePath, Path.GetDirectoryName(filePath) + "\\song.mp3");
 
-                filePath = Path.GetDirectoryName(filePath) + "\\song.mp3";
+                    filePath = Path.GetDirectoryName(filePath) + "\\song.mp3";
 
-                MP3toOGG.ConvertToOgg(filePath, complete);
+                    MP3toOGG.ConvertToOgg(filePath, complete);
+                }
+                else
+                {
+                    if (File.Exists(complete + "\\song.ogg"))
+                    {
+                        File.Delete(complete + "\\song.ogg");
+                    }
+                    File.Copy(filePath, complete + "\\song.ogg");
+                }
 
                 List<ColorNote> colorNotes = new();
                 List<BurstSliderData> burstSliders;
 
-                float bpm;
+                float bpm = 0;
                 bool limiter = true;
 
                 List<float> indistinguishableRange = new();
@@ -602,11 +617,11 @@ namespace Lolighter
                 bpm = group.Tempo;
                 try
                 {
-                    bpm = float.Parse(Interaction.InputBox("Enter song BPM (if it's wrong)", "Automatic BPM detection", bpm.ToString()));
+                    bpm = float.Parse(Interaction.InputBox("Enter song BPM", "Automatic BPM detection", bpm.ToString()));
                 }
                 catch (Exception)
                 {
-                    bpm = group.Tempo;
+                    bpm = 200;
                 }
 
                 MessageBoxResult messageBoxResult = MessageBox.Show("Allow inversed backhands flow? Default: No", "Limiter", MessageBoxButton.YesNo);

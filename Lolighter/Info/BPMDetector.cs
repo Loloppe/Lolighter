@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using NAudio.Wave;
 using NAudio.Dsp;
+using System.IO;
+using NAudio.Vorbis;
 
 namespace Lolighter.Info
 {
@@ -148,72 +150,145 @@ namespace Lolighter.Info
         public BPMDetector(string audioFile, int start = 0, int length = 0)
         {
             // Load the file
-            using (MediaFoundationReader reader = new MediaFoundationReader(audioFile))
+            if(Path.GetExtension(audioFile) == ".ogg" || Path.GetExtension(audioFile) == ".egg")
             {
-                // Originally the sample rate was constant (44100), and the number of channels was 2. 
-                // Let's just in case take them from file's properties
-                sampleRate = reader.WaveFormat.SampleRate;
-                channels = reader.WaveFormat.Channels;
-
-                int bytesPerSample = reader.WaveFormat.BitsPerSample / 8;
-                if (bytesPerSample == 0)
+                using (VorbisWaveReader reader = new VorbisWaveReader(audioFile))
                 {
-                    bytesPerSample = 2; // assume 16 bit
-                }
+                    // Originally the sample rate was constant (44100), and the number of channels was 2. 
+                    // Let's just in case take them from file's properties
+                    sampleRate = reader.WaveFormat.SampleRate;
+                    channels = reader.WaveFormat.Channels;
 
-                int sampleCount = (int)reader.Length / bytesPerSample;
-
-                // Read the wave data
-
-                start *= channels * sampleRate;
-                length *= channels * sampleRate;
-                if (start >= sampleCount)
-                {
-                    groups = new BPMGroup[0];
-                    return;
-                }
-                if (length == 0 || start + length >= sampleCount)
-                {
-                    length = sampleCount - start;
-                }
-
-                length = (int)(length / channels) * channels;
-
-                ISampleProvider sampleReader = reader.ToSampleProvider();
-                float[] samples = new float[length];
-                sampleReader.Read(samples, start, length);
-
-                // Beats, or kicks, generally occur around the 100 to 150 hz range.
-                // Below this is often the bassline.  So let's focus just on that.
-
-                for (int ch = 0; ch < channels; ++ch)
-                {
-                    // First a lowpass to remove most of the song.
-
-                    BiQuadFilter lowpass = BiQuadFilter.LowPassFilter(sampleRate, 150.0F, 1.0F);
-
-                    // Now a highpass to remove the bassline.
-
-                    BiQuadFilter highpass = BiQuadFilter.HighPassFilter(sampleRate, 100.0F, 1.0F);
-
-                    for (int i = ch; i < length; i += channels)
+                    int bytesPerSample = reader.WaveFormat.BitsPerSample / 8;
+                    if (bytesPerSample == 0)
                     {
-                        samples[i] = highpass.Transform(lowpass.Transform(samples[i]));
+                        bytesPerSample = 2; // assume 16 bit
                     }
+
+                    int sampleCount = (int)reader.Length / bytesPerSample;
+
+                    // Read the wave data
+
+                    start *= channels * sampleRate;
+                    length *= channels * sampleRate;
+                    if (start >= sampleCount)
+                    {
+                        groups = new BPMGroup[0];
+                        return;
+                    }
+                    if (length == 0 || start + length >= sampleCount)
+                    {
+                        length = sampleCount - start;
+                    }
+
+                    length = (int)(length / channels) * channels;
+
+                    ISampleProvider sampleReader = reader.ToSampleProvider();
+                    float[] samples = new float[length];
+                    sampleReader.Read(samples, start, length);
+
+                    // Beats, or kicks, generally occur around the 100 to 150 hz range.
+                    // Below this is often the bassline.  So let's focus just on that.
+
+                    for (int ch = 0; ch < channels; ++ch)
+                    {
+                        // First a lowpass to remove most of the song.
+
+                        BiQuadFilter lowpass = BiQuadFilter.LowPassFilter(sampleRate, 150.0F, 1.0F);
+
+                        // Now a highpass to remove the bassline.
+
+                        BiQuadFilter highpass = BiQuadFilter.HighPassFilter(sampleRate, 100.0F, 1.0F);
+
+                        for (int i = ch; i < length; i += channels)
+                        {
+                            samples[i] = highpass.Transform(lowpass.Transform(samples[i]));
+                        }
+                    }
+
+                    Peak[] peaks = getPeaks(samples);
+
+                    BPMGroup[] allGroups = getIntervals(peaks);
+
+                    Array.Sort(allGroups, (x, y) => y.Count.CompareTo(x.Count));
+
+                    if (allGroups.Length > 5)
+                    {
+                        Array.Resize(ref allGroups, 5);
+                    }
+
+                    this.groups = allGroups;
                 }
-
-                Peak[] peaks = getPeaks(samples);
-
-                BPMGroup[] allGroups = getIntervals(peaks);
-
-                Array.Sort(allGroups, (x, y) => y.Count.CompareTo(x.Count));
-
-                if (allGroups.Length > 5)
+            }
+            else
+            {
+                using (MediaFoundationReader reader = new MediaFoundationReader(audioFile))
                 {
-                    Array.Resize(ref allGroups, 5);
-                }
+                    // Originally the sample rate was constant (44100), and the number of channels was 2. 
+                    // Let's just in case take them from file's properties
+                    sampleRate = reader.WaveFormat.SampleRate;
+                    channels = reader.WaveFormat.Channels;
 
-                this.groups = allGroups;
+                    int bytesPerSample = reader.WaveFormat.BitsPerSample / 8;
+                    if (bytesPerSample == 0)
+                    {
+                        bytesPerSample = 2; // assume 16 bit
+                    }
+
+                    int sampleCount = (int)reader.Length / bytesPerSample;
+
+                    // Read the wave data
+
+                    start *= channels * sampleRate;
+                    length *= channels * sampleRate;
+                    if (start >= sampleCount)
+                    {
+                        groups = new BPMGroup[0];
+                        return;
+                    }
+                    if (length == 0 || start + length >= sampleCount)
+                    {
+                        length = sampleCount - start;
+                    }
+
+                    length = (int)(length / channels) * channels;
+
+                    ISampleProvider sampleReader = reader.ToSampleProvider();
+                    float[] samples = new float[length];
+                    sampleReader.Read(samples, start, length);
+
+                    // Beats, or kicks, generally occur around the 100 to 150 hz range.
+                    // Below this is often the bassline.  So let's focus just on that.
+
+                    for (int ch = 0; ch < channels; ++ch)
+                    {
+                        // First a lowpass to remove most of the song.
+
+                        BiQuadFilter lowpass = BiQuadFilter.LowPassFilter(sampleRate, 150.0F, 1.0F);
+
+                        // Now a highpass to remove the bassline.
+
+                        BiQuadFilter highpass = BiQuadFilter.HighPassFilter(sampleRate, 100.0F, 1.0F);
+
+                        for (int i = ch; i < length; i += channels)
+                        {
+                            samples[i] = highpass.Transform(lowpass.Transform(samples[i]));
+                        }
+                    }
+
+                    Peak[] peaks = getPeaks(samples);
+
+                    BPMGroup[] allGroups = getIntervals(peaks);
+
+                    Array.Sort(allGroups, (x, y) => y.Count.CompareTo(x.Count));
+
+                    if (allGroups.Length > 5)
+                    {
+                        Array.Resize(ref allGroups, 5);
+                    }
+
+                    this.groups = allGroups;
+                }
             }
         }
     }

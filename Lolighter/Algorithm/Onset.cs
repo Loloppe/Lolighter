@@ -2,6 +2,7 @@
 using Lolighter.Onset_Detection;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 
@@ -40,6 +41,15 @@ namespace Lolighter.Algorithm
                 double lastBeat = -1;
                 double lastOnset = -1;
 
+                double offset = 0;
+                if (Path.GetExtension(audioPath) == ".mp3")
+                {
+                    offset = 0.125;
+                }
+                else
+                {
+                    offset = 0.03125;
+                }
 
                 bool wasDouble = false;
 
@@ -53,7 +63,7 @@ namespace Lolighter.Algorithm
                     if (onset >= 0.01)
                     {
                         double time = number * milisec; // Get the time for the current onset
-                        double beat = (time * bpm / 60) - 0.125; // Convert the time into beat
+                        double beat = (time * bpm / 60) - offset; // Convert the time into beat
 
                         if (beat - lastBeat >= LIMITER)
                         {
@@ -114,9 +124,9 @@ namespace Lolighter.Algorithm
                 // Method to generate the map pattern
                 (notes, chains) = NoteGenerator.AutoMapper(timings, bpm, limiter);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                MessageBox.Show("ERROR: Reading music file");
+                MessageBox.Show(e.Message);
             }
             finally
             {

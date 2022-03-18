@@ -8,7 +8,7 @@ namespace Lolighter.Onset_Detection
     class OnsetDetection
     {
         FFT fft = new FFT();
-        AudioFileReader PCM;
+        dynamic PCM;
         int SampleSize;
 
         public float[] Onsets { get; set; }
@@ -25,7 +25,7 @@ namespace Lolighter.Onset_Detection
 
 
         // Constructor
-        public OnsetDetection(AudioFileReader pcm, int sampleWindow)
+        public OnsetDetection(dynamic pcm, int sampleWindow)
         {
             PCM = pcm;
             SampleSize = sampleWindow;
