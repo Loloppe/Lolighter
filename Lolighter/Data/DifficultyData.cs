@@ -80,7 +80,7 @@ namespace Lolighter.Data
                 lightRotationEventBoxGroups = new();
             }
             this.lightRotationEventBoxGroups = lightRotationEventBoxGroups;
-            if (basicEventTypesWithKeywords == null)
+            if (basicEventTypesWithKeywords == null || basicEventTypesWithKeywords.data == null)
             {
                 basicEventTypesWithKeywords = new(new());
             }
@@ -148,7 +148,7 @@ namespace Lolighter.Data
             {
                 lightRotationEventBoxGroups = new();
             }
-            if (basicEventTypesWithKeywords == null)
+            if (basicEventTypesWithKeywords == null || basicEventTypesWithKeywords.data == null)
             {
                 basicEventTypesWithKeywords = new(new());
             }

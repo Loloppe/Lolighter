@@ -25,7 +25,7 @@ namespace Lolighter.Data.Structure
 
 		[JsonInclude]
 		[JsonPropertyName("d")]
-		public List<BasicEventTypesForKeyword> data;
+		public List<BasicEventTypesForKeyword> data = new();
 
 		[JsonConstructor]
 		public BasicEventTypesWithKeywords(List<BasicEventTypesForKeyword> data)
